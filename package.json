@@ -1,0 +1,13 @@
+{
+  "name": "michaelsantacruz",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "npm run build && node scripts/check.mjs",
+    "preview": "npm run build && python3 -m http.server 4173 --directory dist"
+  }
+}
