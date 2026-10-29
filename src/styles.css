@@ -1,32 +1,36 @@
-/* Bricolage Grotesque and Outfit are under the SIL Open Font License. See public/fonts. */
+/* Fraunces and Nunito Sans are under the SIL Open Font License. See public/fonts. */
 
 @font-face {
-  font-family: "Bricolage Grotesque";
+  font-family: "Fraunces";
   font-style: normal;
-  font-weight: 500 800;
+  font-weight: 500 700;
   font-display: swap;
-  src: url("/fonts/bricolage-grotesque-latin.woff2") format("woff2");
+  src: url("/fonts/fraunces-latin.woff2") format("woff2");
 }
 
 @font-face {
-  font-family: "Outfit";
+  font-family: "Nunito Sans";
   font-style: normal;
-  font-weight: 400 600;
+  font-weight: 400 700;
   font-display: swap;
-  src: url("/fonts/outfit-latin.woff2") format("woff2");
+  src: url("/fonts/nunito-sans-latin.woff2") format("woff2");
 }
 
 :root {
-  --bg: #09090b;
-  --bg-raised: #121216;
-  --text: #f6f3ee;
-  --muted: #b7b1a8;
-  --faint: #8f8a83;
-  --line: rgba(246, 243, 238, 0.12);
-  --accent: #ff4c29;
-  --accent-ink: #1a0703;
-  --display: "Bricolage Grotesque", "Arial Narrow", sans-serif;
-  --body: "Outfit", "Segoe UI", sans-serif;
+  --bg: #1a120c;
+  --bg-raised: #2a1c14;
+  --field: #140e0a;
+  --text: #f6efe2;
+  --muted: #d2c3ae;
+  --faint: #b3a08c;
+  --line: rgba(246, 239, 226, 0.16);
+  --accent: #e2a322;
+  --rust: #c4542a;
+  --moss: #3e6b4a;
+  --moss-bright: #8fb56a;
+  --accent-ink: #1a120c;
+  --display: "Fraunces", "Iowan Old Style", "Palatino Linotype", Palatino, serif;
+  --body: "Nunito Sans", "Segoe UI", sans-serif;
   --header-h: 4.25rem;
   --radius: 18px;
   --shadow: 0 20px 50px rgba(0, 0, 0, 0.28);
@@ -63,13 +67,51 @@ body {
   font-family: var(--body);
   font-size: 1.05rem;
   line-height: 1.5;
+  font-synthesis: none;
   color: var(--text);
   background:
-    radial-gradient(920px 480px at 100% -8%, rgba(255, 76, 41, 0.2), transparent 56%),
-    radial-gradient(680px 420px at -12% 12%, rgba(255, 76, 41, 0.08), transparent 52%),
+    radial-gradient(980px 540px at 108% -10%, rgba(196, 84, 42, 0.42), transparent 58%),
+    radial-gradient(760px 520px at -18% 6%, rgba(62, 107, 74, 0.62), transparent 54%),
+    radial-gradient(680px 460px at 72% 112%, rgba(226, 163, 34, 0.2), transparent 48%),
     var(--bg);
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+}
+
+.grove,
+.grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.grove {
+  z-index: 0;
+  overflow: hidden;
+}
+
+.grove svg {
+  position: absolute;
+  width: 145%;
+  height: 145%;
+  left: -22%;
+  top: -12%;
+}
+
+.grain {
+  z-index: 40;
+  opacity: 0.2;
+  background-image: url("/grain.png");
+  background-size: 160px 160px;
+  mix-blend-mode: overlay;
+}
+
+.skip,
+.site-header,
+main,
+.site-footer {
+  position: relative;
+  z-index: 1;
 }
 
 img {
@@ -132,11 +174,19 @@ button {
   top: 0;
   z-index: 30;
   min-height: var(--header-h);
-  background: rgba(9, 9, 11, 0.84);
+  background: rgba(26, 18, 12, 0.88);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-top: 3px solid var(--accent);
+  border-top: 0;
   border-bottom: 1px solid var(--line);
+}
+
+.site-header::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--moss) 0%, var(--moss-bright) 30%, var(--accent) 62%, var(--rust) 100%);
 }
 
 .header-inner {
@@ -153,8 +203,8 @@ button {
   color: var(--text);
   text-decoration: none;
   font-family: var(--display);
-  font-weight: 800;
-  letter-spacing: -0.04em;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   font-size: 1.05rem;
   line-height: 1;
   padding: 0.35rem 0;
@@ -197,9 +247,15 @@ main:focus {
   display: grid;
   gap: 1.2rem;
   padding-bottom: 3.75rem;
+  min-width: 0;
+}
+
+.stack > * {
+  min-width: 0;
 }
 
 #lessons,
+#photos,
 #performances,
 #instagram,
 #bands,
@@ -209,7 +265,7 @@ main:focus {
 
 .hero {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
   padding-top: 1.6rem;
   padding-bottom: 0.35rem;
@@ -218,10 +274,11 @@ main:focus {
 .hero h1 {
   margin: 0;
   font-family: var(--display);
-  font-weight: 800;
-  letter-spacing: -0.06em;
-  line-height: 0.84;
-  font-size: clamp(3.45rem, 16.2vw, 6.6rem);
+  font-weight: 700;
+  font-variation-settings: "SOFT" 70, "WONK" 1, "opsz" 144;
+  letter-spacing: -0.03em;
+  line-height: 0.9;
+  font-size: clamp(3.15rem, 14.4vw, 5.9rem);
 }
 
 .name-first,
@@ -247,7 +304,48 @@ main:focus {
   height: 3px;
   margin: 1.15rem 0 0;
   border-radius: 999px;
-  background: var(--accent);
+  background: linear-gradient(90deg, var(--moss-bright), var(--accent) 55%, var(--rust));
+}
+
+.tours {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.75rem;
+  width: fit-content;
+  max-width: 100%;
+  margin: 1.15rem 0 0;
+  padding: 0.55rem 0.85rem 0.55rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(226, 163, 34, 0.62);
+  background:
+    linear-gradient(110deg, rgba(196, 84, 42, 0.34), rgba(62, 107, 74, 0.38)),
+    var(--bg);
+  box-shadow: 0 0 0 6px rgba(226, 163, 34, 0.06);
+}
+
+.mushroom {
+  width: 2.15rem;
+  height: 2.15rem;
+  flex: 0 0 auto;
+}
+
+.tours-label,
+.tours-bases {
+  font-family: var(--display);
+  font-weight: 700;
+  font-variation-settings: "SOFT" 40, "WONK" 1, "opsz" 72;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.tours-label {
+  font-size: clamp(1.15rem, 2.2vw, 1.45rem);
+}
+
+.tours-bases {
+  font-size: clamp(1.35rem, 2.6vw, 1.85rem);
+  color: var(--accent);
 }
 
 .intro {
@@ -264,7 +362,7 @@ main:focus {
 .tag {
   display: inline-flex;
   align-items: center;
-  border: 1px dashed rgba(255, 76, 41, 0.75);
+  border: 1px dashed rgba(226, 163, 34, 0.8);
   color: var(--accent);
   border-radius: 999px;
   padding: 0.14rem 0.48rem;
@@ -320,17 +418,17 @@ a.chip:hover {
   padding: 1.1rem 1.15rem;
   border-radius: var(--radius);
   background:
-    linear-gradient(105deg, rgba(255, 76, 41, 0.22), rgba(255, 76, 41, 0.05) 58%),
+    linear-gradient(105deg, rgba(196, 84, 42, 0.32), rgba(62, 107, 74, 0.32) 64%),
     var(--bg-raised);
-  border: 1px solid rgba(255, 76, 41, 0.5);
+  border: 1px solid rgba(226, 163, 34, 0.55);
 }
 
 .lessons h2 {
   margin: 0;
   font-family: var(--display);
-  font-weight: 800;
-  letter-spacing: -0.045em;
-  line-height: 1.02;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.08;
   font-size: clamp(1.55rem, 3vw, 2.15rem);
   text-wrap: balance;
 }
@@ -388,9 +486,9 @@ button.btn:disabled {
 .contact-card h2 {
   margin: 0 0 0.45rem;
   font-family: var(--display);
-  font-weight: 800;
-  letter-spacing: -0.045em;
-  line-height: 0.95;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.02;
   font-size: clamp(1.7rem, 3vw, 2.15rem);
 }
 
@@ -473,9 +571,9 @@ button.btn:disabled {
 
 .ig-follow-handle {
   font-family: var(--display);
-  font-weight: 800;
-  font-size: clamp(1.35rem, 2.4vw, 1.85rem);
-  letter-spacing: -0.045em;
+  font-weight: 700;
+  font-size: clamp(1.25rem, 2.2vw, 1.7rem);
+  letter-spacing: -0.02em;
   line-height: 1;
 }
 
@@ -500,7 +598,7 @@ button.btn:disabled {
   aspect-ratio: 1;
   border-radius: 14px;
   overflow: hidden;
-  background: #0b0b0e;
+  background: var(--field);
 }
 
 .ig-tile img {
@@ -513,10 +611,10 @@ button.btn:disabled {
   display: grid;
   place-items: center;
   padding: 0.35rem;
-  border: 1px dashed rgba(255, 76, 41, 0.55);
+  border: 1px dashed rgba(226, 163, 34, 0.7);
   background:
-    linear-gradient(160deg, rgba(255, 76, 41, 0.18), transparent 62%),
-    #141418;
+    linear-gradient(160deg, rgba(62, 107, 74, 0.45), rgba(196, 84, 42, 0.22) 70%),
+    var(--field);
 }
 
 .ig-tile .tag {
@@ -572,15 +670,15 @@ button.btn:disabled {
 }
 
 .band-card:hover {
-  border-color: rgba(255, 76, 41, 0.75);
+  border-color: rgba(226, 163, 34, 0.8);
 }
 
 .band-label {
   font-family: var(--display);
-  font-weight: 800;
+  font-weight: 700;
   font-size: clamp(1.28rem, 2vw, 1.6rem);
-  letter-spacing: -0.04em;
-  line-height: 1.05;
+  letter-spacing: -0.02em;
+  line-height: 1.12;
   text-wrap: balance;
 }
 
@@ -597,9 +695,9 @@ button.btn:disabled {
 }
 
 .contact-card h2 {
-  font-size: clamp(2.35rem, 6.2vw, 4.15rem);
-  line-height: 0.9;
-  letter-spacing: -0.05em;
+  font-size: clamp(2.2rem, 5.6vw, 3.8rem);
+  line-height: 0.98;
+  letter-spacing: -0.03em;
   margin-bottom: 1rem;
   max-width: 11ch;
 }
@@ -609,7 +707,7 @@ button.btn:disabled {
 }
 
 .contact-card.is-lessons {
-  border-color: rgba(255, 76, 41, 0.55);
+  border-color: rgba(226, 163, 34, 0.7);
 }
 
 .form-grid,
@@ -636,7 +734,7 @@ textarea {
   font: inherit;
   font-size: 1rem;
   color: var(--text);
-  background: #0b0b0e;
+  background: var(--field);
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 0.85rem 0.9rem;
@@ -652,7 +750,7 @@ textarea {
 select {
   appearance: none;
   padding-right: 2.5rem;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23f6f3ee' stroke-width='1.8'%3E%3Cpath d='M5 7.5 10 12.5 15 7.5'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23f6efe2' stroke-width='1.8'%3E%3Cpath d='M5 7.5 10 12.5 15 7.5'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0.85rem center;
   background-size: 1rem;
@@ -674,7 +772,7 @@ textarea:focus-visible {
 input:-webkit-autofill {
   -webkit-text-fill-color: var(--text);
   caret-color: var(--text);
-  box-shadow: 0 0 0 1000px #0b0b0e inset;
+  box-shadow: 0 0 0 1000px #140e0a inset;
 }
 
 .reason-note {
@@ -712,8 +810,8 @@ input:-webkit-autofill {
   margin: 0.4rem 0 0;
   padding: 1rem 1.05rem;
   border-radius: 14px;
-  background: rgba(255, 76, 41, 0.12);
-  border: 1px solid rgba(255, 76, 41, 0.5);
+  background: rgba(196, 84, 42, 0.16);
+  border: 1px solid rgba(226, 163, 34, 0.55);
 }
 
 .success:focus {
@@ -748,8 +846,190 @@ input:-webkit-autofill {
   color: var(--faint);
 }
 
-.mark-wrap {
-  display: none;
+.hero-photo {
+  margin: 1.1rem 0 0;
+  min-width: 0;
+  max-width: 100%;
+  border-radius: 22px;
+  overflow: hidden;
+  border: 1px solid rgba(246, 239, 226, 0.18);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+  background: var(--field);
+}
+
+.hero-photo img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 5 / 4;
+  object-fit: cover;
+  object-position: 64% 42%;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid rgba(226, 163, 34, 0.75);
+}
+
+.section-head h2,
+.photos h2 {
+  margin: 0.2rem 0 0.75rem;
+  font-family: var(--display);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.02;
+  font-size: clamp(1.7rem, 3vw, 2.15rem);
+}
+
+.photo-strip {
+  display: flex;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0.15rem 0 0.4rem;
+  list-style: none;
+  max-width: 100%;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+}
+
+.photo-card {
+  flex: 0 0 auto;
+  width: min(72vw, 250px);
+  scroll-snap-align: start;
+}
+
+.photo-card.is-featured {
+  width: min(86vw, 420px);
+}
+
+.photo-open {
+  display: block;
+  width: 100%;
+  height: 320px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--field);
+  cursor: pointer;
+}
+
+.photo-card.is-featured .photo-open {
+  height: 380px;
+}
+
+.photo-open img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+}
+
+.photo-caption,
+.photo-credit {
+  margin: 0.4rem 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.photo-credit {
+  margin-top: 0.7rem;
+}
+
+.ig-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 0.2rem 0 0.9rem;
+}
+
+.ig-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.45rem;
+}
+
+.ig-pause {
+  appearance: none;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  border-radius: 999px;
+  min-height: 36px;
+  padding: 0.2rem 0.75rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+.ig-scroller {
+  max-width: 100%;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  border-radius: 16px;
+}
+
+.ig-track,
+.ig-set {
+  display: flex;
+  gap: 0.7rem;
+  width: max-content;
+}
+
+.ig-card {
+  flex: 0 0 auto;
+  width: min(68vw, 220px);
+  height: 220px;
+  scroll-snap-align: start;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--field);
+}
+
+.ig-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ig-frame {
+  width: 100%;
+  min-height: 420px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--field);
+}
+
+.lightbox {
+  width: min(1100px, calc(100vw - 1.5rem));
+  max-height: calc(100vh - 1.5rem);
+  margin: auto;
+  padding: 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.lightbox::backdrop {
+  background: rgba(20, 14, 10, 0.82);
+}
+
+.lightbox-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  justify-content: flex-end;
+  margin-bottom: 0.6rem;
+}
+
+.lightbox-img {
+  width: 100%;
+  max-height: calc(100vh - 8rem);
+  object-fit: contain;
+  border-radius: 12px;
+  background: #000;
 }
 
 @media (min-width: 720px) {
@@ -816,47 +1096,50 @@ input:-webkit-autofill {
 
 @media (min-width: 880px) {
   .hero {
-    grid-template-columns: minmax(0, 1.35fr) minmax(220px, 0.62fr);
+    grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
     align-items: center;
     gap: 1.5rem;
   }
 
   .hero-copy {
-    container-type: inline-size;
+    display: contents;
+  }
+
+  .hero h1,
+  .tagline,
+  .accent-rule,
+  .tours,
+  .intro,
+  .chips,
+  .hero-photo {
     min-width: 0;
+    max-width: 100%;
+  }
+
+  .hero h1,
+  .tagline,
+  .accent-rule,
+  .tours,
+  .intro,
+  .chips {
+    grid-column: 1;
   }
 
   .hero h1 {
-    font-size: clamp(4.8rem, 18cqi, 8.6rem);
+    font-size: clamp(3.6rem, 4.7vw, 6.15rem);
   }
 
-  .mark-wrap {
-    display: grid;
-    place-items: center;
+  .hero-photo {
+    grid-column: 2;
+    grid-row: 1 / span 8;
+    align-self: center;
+    margin: 0;
   }
 
-  .mark {
-    width: min(100%, 390px);
-    aspect-ratio: 1;
-    border-radius: 50%;
-    position: relative;
-    background:
-      radial-gradient(circle at 50% 50%, var(--accent) 0 5%, transparent 5.8%),
-      radial-gradient(circle at 50% 50%, transparent 0 28%, rgba(255, 76, 41, 0.95) 28.5% 29.7%, transparent 30.2%),
-      radial-gradient(circle at 50% 50%, transparent 0 47%, rgba(246, 243, 238, 0.62) 47.5% 48.3%, transparent 48.8%),
-      radial-gradient(circle at 50% 50%, transparent 0 65%, rgba(255, 76, 41, 0.8) 65.5% 66.6%, transparent 67.2%),
-      radial-gradient(circle at 50% 50%, transparent 0 81%, rgba(246, 243, 238, 0.28) 81.4% 82.2%, transparent 82.8%);
-    filter: drop-shadow(0 0 36px rgba(255, 76, 41, 0.16));
-  }
-
-  .mark::before {
-    content: "";
-    position: absolute;
-    inset: 7%;
-    border-radius: 50%;
-    border: 2px solid transparent;
-    border-top-color: var(--text);
-    border-right-color: rgba(255, 76, 41, 0.45);
+  .hero-photo img {
+    aspect-ratio: 4 / 5;
+    max-height: min(78vh, 720px);
+    object-position: 70% 32%;
   }
 }
 
@@ -895,12 +1178,6 @@ input:-webkit-autofill {
   }
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 @media (prefers-reduced-motion: no-preference) {
   .hero-copy > * {
     animation: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -922,9 +1199,22 @@ input:-webkit-autofill {
     animation-delay: 0.26s;
   }
 
-  .mark::before {
-    animation: spin 32s linear infinite;
+  .hero-copy > *:nth-child(6) {
+    animation-delay: 0.32s;
   }
+
+  .hero-copy > *:nth-child(7) {
+    animation-delay: 0.38s;
+  }
+
+  .grove svg {
+    animation: drift 42s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes drift {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-2%, 1.5%, 0); }
 }
 
 @media (prefers-reduced-motion: reduce) {

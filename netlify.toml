@@ -5,6 +5,13 @@
 [build.environment]
   NODE_VERSION = "22"
 
+[functions]
+  node_bundler = "esbuild"
+
+# Mondays at 12:00 UTC. Extends the long-lived Instagram token before it expires.
+[functions."instagram-refresh"]
+  schedule = "0 12 * * 1"
+
 # The contact form is static HTML in dist/index.html (name="contact", data-netlify="true").
 # Netlify Forms picks it up on deploy. Submissions land in the site's Forms dashboard.
 
@@ -23,5 +30,10 @@
 
 [[headers]]
   for = "/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/images/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"

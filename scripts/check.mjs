@@ -23,8 +23,12 @@ const exact = {
   cta: "Contact Me / Let\u2019s Make Art",
   lessons: "Hit me up for private lessons",
   bandsTitle: "Bands & Studios",
-  handle: "@MikeySantaCruz",
-  instagram: "https://www.instagram.com/MikeySantaCruz/",
+  handle: "@mikeysantacruz",
+  instagram: "https://www.instagram.com/mikeysantacruz/",
+  message: "https://ig.me/m/mikeysantacruz",
+  follow: "Follow @mikeysantacruz",
+  messageLabel: "Message me on Instagram",
+  credit: "Photos: Greg Thistle Photography",
   bands: [
     ["Flotilla \u2014 Drummer", "https://www.instagram.com/Flotilla_Band/", "@Flotilla_Band"],
     ["Jake Thistle \u2014 Drummer", "https://www.instagram.com/JakeThistleMusic/", "@JakeThistleMusic"],
@@ -42,10 +46,21 @@ must(site.lessons.line === exact.lessons, "lessons line drifted from the request
 must(site.bands.title === exact.bandsTitle, "bands title drifted");
 must(site.instagram.handle === exact.handle, "Instagram handle drifted");
 must(site.instagram.url === exact.instagram, "Instagram URL drifted");
+must(site.instagram.messageUrl === exact.message, "Instagram message URL drifted");
+must(site.instagram.followLabel === exact.follow, "Follow button drifted");
+must(site.instagram.messageLabel === exact.messageLabel, "Message button drifted");
+must(site.gallery.credit === exact.credit, "photo credit drifted");
 
 must(text.includes(exact.tagline), "tagline missing from the page");
 must(text.includes(exact.cta), "contact wording missing from the page");
 must(text.includes(exact.lessons), "lessons line missing from the page");
+must(site.tours.label === "Available for tours", "tours label drifted");
+must(site.tours.bases === "NYC / LA", "tour bases drifted");
+must(text.includes("Available for tours"), "tours note missing");
+must(text.includes("NYC / LA"), "tour bases missing from the page");
+must(html.includes(site.photo.alt), "photo alt missing");
+must(html.includes("michael-drumming-1600.webp"), "large photo missing");
+must(html.includes('type="image/webp"'), "webp source missing");
 must(text.includes(site.name), "name missing");
 must(html.includes("<h1"), "missing h1");
 must((html.match(/<h1[\s>]/g) || []).length === 1, "expected a single h1");
@@ -66,7 +81,7 @@ must(fs.existsSync(path.join(root, "dist", "favicon.svg")), "favicon missing fro
 must(!/href=""/.test(html), "empty href");
 must(!/href="#"(?![\w-])/.test(html), "bare hash href");
 must(!/lorem|ipsum|grammy|testimonial/i.test(text), "unexpected invented copy");
-must((html.match(/class="tag"/g) || []).length >= 8, "expected visible placeholder badges");
+must((html.match(/class="tag"/g) || []).length >= 5, "expected visible placeholder badges");
 
 for (const [label, href, handle] of exact.bands) {
   must(site.bands.items.some((item) => item.label === label && item.href === href && item.handle === handle), `${label} missing from content`);
@@ -75,7 +90,12 @@ for (const [label, href, handle] of exact.bands) {
   must(text.includes(handle), `${handle} missing`);
 }
 
-must(text.includes(exact.handle), "Instagram handle not visible");
+must(text.includes(exact.follow), "Follow button missing");
+must(text.includes(exact.messageLabel), "Message button missing");
+must(html.includes(exact.message), "message link missing");
+must(text.includes(exact.credit), "photo credit missing");
+must(html.includes("blue swirl-pattern drum kit"), "street kit alt missing");
+must(html.includes("netlify/functions/instagram") || html.includes("/.netlify/functions/instagram"), "instagram function url missing");
 must((html.match(/rel="me noopener noreferrer"/g) || []).length >= 1, "personal Instagram should use rel=me");
 
 if (failed) process.exit(1);

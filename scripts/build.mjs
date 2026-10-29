@@ -27,9 +27,9 @@ function assertSite(data) {
   if (!data.contact.label || !data.lessons.line || !data.name) {
     throw new Error("name, lessons line, and contact label are required");
   }
-  for (const post of data.instagram.posts) {
-    if (post.src && !post.alt) {
-      throw new Error("Instagram posts with src need alt text");
+  for (const photo of data.gallery.items) {
+    if (!photo.alt || !photo.large || !photo.thumb) {
+      throw new Error("Each gallery photo needs alt, thumb, and large");
     }
   }
 }
@@ -103,22 +103,58 @@ function renderShows(block) {
   return `<ul class="shows">${items}</ul>`;
 }
 
-function renderFeed(ig) {
-  if (ig.embedHtml && ig.embedHtml.trim()) {
-    return `<div class="ig-embed">${ig.embedHtml}</div>`;
-  }
-  if (!ig.posts.length) {
-    return `<p class="fine">${esc(ig.feedNote)}</p>`;
-  }
-  const tiles = ig.posts
-    .map((post) => {
-      if (post.src && !post.placeholder) {
-        return `<li class="ig-tile"><img src="${esc(post.src)}" alt="${esc(post.alt)}"></li>`;
-      }
-      return `<li class="ig-tile is-placeholder"><span class="tag">${esc(site.placeholderLabel)}</span></li>`;
+function renderGallery(gallery) {
+  const cards = gallery.items
+    .map((photo, index) => {
+      const featured = photo.featured ? " is-featured" : "";
+      const focus = photo.focus ? ` style="object-position:${esc(photo.focus)}"` : "";
+      return `<li class="photo-card${featured}">
+          <button type="button" class="photo-open" data-index="${index}" data-full="${esc(photo.large)}" data-alt="${esc(photo.alt)}">
+            <img src="${esc(photo.thumb)}" srcset="${esc(photo.srcset)}" sizes="(min-width: 800px) 320px, 70vw" alt="${esc(photo.alt)}" width="${photo.width}" height="${photo.height}" loading="lazy" decoding="async"${focus}>
+          </button>
+          ${photo.caption ? `<p class="photo-caption">${esc(photo.caption)}</p>` : ""}
+        </li>`;
     })
     .join("");
-  return `<ul class="ig-grid">${tiles}</ul><p class="fine">${esc(ig.feedNote)}</p>`;
+  return `<ul class="photo-strip">${cards}</ul><p class="photo-credit">${esc(gallery.credit)}</p>`;
+}
+
+function fallbackSlides(ig, gallery) {
+  return gallery.items
+    .map((photo) => {
+      return `<a class="ig-card" href="${esc(ig.url)}"${externalAttrs(ig.url, { me: true })}>
+          <img src="${esc(photo.thumb)}" alt="${esc(photo.alt)}" width="${photo.width}" height="${photo.height}" loading="lazy" decoding="async">
+        </a>`;
+    })
+    .join("");
+}
+
+function renderInstagramFeed(ig, gallery) {
+  const provider = (ig.provider || "").trim().toLowerCase();
+  const feedId = (ig.feedId || "").trim();
+  if (provider === "lightwidget" && feedId && !feedId.includes("/") && !feedId.includes(" ")) {
+    return `<iframe class="ig-frame" title="Instagram posts from ${esc(ig.handle)}" src="https://cdn.lightwidget.com/widgets/${encodeURIComponent(feedId)}.html" loading="lazy"></iframe>`;
+  }
+  if (provider === "behold" && feedId && !feedId.includes(" ")) {
+    return `<div class="ig-behold"><figure data-behold-id="${esc(feedId)}"></figure></div>
+      <script type="module" src="https://w.behold.so/widget.js"></script>`;
+  }
+  if (/^https:\/\//i.test(feedId)) {
+    return `<iframe class="ig-frame" title="Instagram posts from ${esc(ig.handle)}" src="${esc(feedId)}" loading="lazy"></iframe>`;
+  }
+  const slides = fallbackSlides(ig, gallery);
+  return `<div class="ig-live" data-ig-live data-profile="${esc(ig.url)}" data-endpoint="/.netlify/functions/instagram">
+      <div class="ig-toolbar">
+        <button type="button" class="ig-pause" data-ig-pause aria-pressed="false">Pause</button>
+      </div>
+      <div class="ig-scroller" data-ig-scroller tabindex="0" aria-label="Instagram photos">
+        <div class="ig-track" data-ig-track>
+          <div class="ig-set">${slides}</div>
+          <div class="ig-set" aria-hidden="true">${slides}</div>
+        </div>
+      </div>
+      <p class="fine" data-ig-note>${esc(ig.fallbackNote)}</p>
+    </div>`;
 }
 
 function renderBands(block) {
@@ -152,6 +188,7 @@ function jsonLd(data, pageUrl) {
     jobTitle: data.tagline.split(" · ").map((part) => part.trim()),
     description: data.seo.description,
     sameAs: [data.instagram.url],
+    image: pageUrl ? `${pageUrl}${data.photo.src}` : data.photo.src,
   };
   if (pageUrl) payload.url = pageUrl;
   return JSON.stringify(payload).replaceAll("<", "\\u003c");
@@ -183,7 +220,7 @@ function renderPage(data, assetHash) {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="dark">
-    <meta name="theme-color" content="#09090b">
+    <meta name="theme-color" content="#1a120c">
     <meta name="format-detection" content="telephone=no">
     <title>${esc(data.seo.title)}</title>
     <meta name="description" content="${esc(data.seo.description)}">
@@ -192,20 +229,29 @@ function renderPage(data, assetHash) {
     <meta property="og:title" content="${esc(data.seo.title)}">${ogUrl}
     <meta property="og:description" content="${esc(data.seo.description)}">
     <meta property="og:image" content="${esc(image)}">
-    <meta property="og:image:alt" content="${esc(data.name)}">
+    <meta property="og:image:alt" content="${esc(data.photo.alt)}">
     <meta property="og:locale" content="en_US">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${esc(data.seo.title)}">
     <meta name="twitter:description" content="${esc(data.seo.description)}">
     <meta name="twitter:image" content="${esc(image)}">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-    <link rel="mask-icon" href="/favicon.svg" color="#ff4c29">
-    <link rel="preload" href="/fonts/bricolage-grotesque-latin.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="/fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="mask-icon" href="/favicon.svg" color="#e2a322">
+    <link rel="preload" href="/fonts/fraunces-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/nunito-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" as="image" href="${esc(data.photo.src)}" imagesrcset="${esc(data.photo.srcset)}" imagesizes="${esc(data.photo.sizes)}" fetchpriority="high">
     <link rel="stylesheet" href="/styles.css?v=${assetHash.css}">
     <script type="application/ld+json">${jsonLd(data, pageUrl)}</script>
   </head>
   <body>
+    <div class="grove" aria-hidden="true">
+      <svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
+        <path fill="#3e6b4a" d="M-80 560c90-140 200-90 290-160 100-78 30-190 150-230 120-40 190 50 300 24 100-24 130-130 240-96 90 28 50 150 150 196 110 50 170-30 250 48 36 36 8 130-36 190-56 78 0 160 30 250H-80Z"/>
+        <path fill="#c4542a" opacity="0.85" d="M1040-60c130 50 190 160 150 250-36 84-140 78-176 156-40 84 16 168-48 230-78 76-200 36-280 100-70 56-30 150-120 176 210 10 470-90 560-250 64-110 20-300-120-380-36-20-60-70 34-282Z"/>
+        <path fill="#e2a322" opacity="0.55" d="M40 60c100 16 80 120 150 164 58 36 140 8 176 78 22 48-28 96-12 148 36 16 20 90-40 112-70 26-130-16-190 18-72 40-36 130-120 140-90 12-150-90-120-180 28-80-40-150-8-230 28-70-8-140 164-250Z"/>
+      </svg>
+    </div>
+    <div class="grain" aria-hidden="true"></div>
     <a class="skip" href="#content">Skip to content</a>
     <header class="site-header">
       <div class="wrap header-inner">
@@ -226,6 +272,30 @@ function renderPage(data, assetHash) {
             </h1>
             <p class="tagline">${esc(data.tagline)}</p>
             <div class="accent-rule" aria-hidden="true"></div>
+            <p class="tours">
+              <svg class="mushroom" viewBox="0 0 64 64" aria-hidden="true">
+                <path fill="#f6efe2" d="M30 36c-1.2 8-1.4 16-1.2 22h6.2c.2-6-.2-14-1.4-22z"/>
+                <ellipse cx="32" cy="28" rx="22" ry="13" fill="#c4542a"/>
+                <ellipse cx="22" cy="26" rx="4.2" ry="3" fill="#f6efe2"/>
+                <ellipse cx="33" cy="22" rx="3" ry="2.3" fill="#e2a322"/>
+                <ellipse cx="42" cy="28" rx="2.6" ry="2" fill="#f6efe2"/>
+              </svg>
+              <span class="tours-label">${esc(data.tours.label)}:</span>
+              <span class="tours-bases">${esc(data.tours.bases)}</span>
+            </p>
+            <figure class="hero-photo">
+              <picture>
+                <source type="image/webp" srcset="${esc(data.photo.srcset)}" sizes="${esc(data.photo.sizes)}">
+                <img
+                  src="${esc(data.photo.fallback)}"
+                  alt="${esc(data.photo.alt)}"
+                  width="${data.photo.width}"
+                  height="${data.photo.height}"
+                  fetchpriority="high"
+                  decoding="async"
+                >
+              </picture>
+            </figure>
             <p class="intro">${introBadge}<span>${esc(data.intro)}</span></p>
             <ul class="chips">
               ${renderChip(
@@ -235,7 +305,6 @@ function renderPage(data, assetHash) {
               ${data.links.map((link) => renderChip(link)).join("\n              ")}
             </ul>
           </div>
-          <div class="mark-wrap" aria-hidden="true"><div class="mark"></div></div>
         </section>
 
         <section id="lessons" class="lessons" aria-labelledby="lessons-heading">
@@ -243,26 +312,27 @@ function renderPage(data, assetHash) {
           <a class="btn" href="#contact" data-reason="${esc(data.lessons.reason)}">${esc(data.contact.label)}${assist}</a>
         </section>
 
-        <div class="split">
-          <section id="performances" class="card" aria-labelledby="performances-heading">
-            <h2 id="performances-heading">${esc(data.performances.title)}</h2>
-            <p class="fine">${esc(data.performances.note)}</p>
-            ${renderShows(data.performances)}
-          </section>
-          <section id="instagram" class="card" aria-labelledby="instagram-heading">
-            <h2 id="instagram-heading">${esc(data.instagram.title)}</h2>
-            <a class="ig-follow" href="${esc(data.instagram.url)}"${externalAttrs(data.instagram.url, { me: true })}>
-              <span class="ig-follow-handle">${esc(data.instagram.handle)}</span>
-              <span class="ig-follow-label">${esc(data.instagram.followLabel)}
-                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-                  <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M7 17 17 7M9 7h8v8"/>
-                </svg>
-              </span>
-              <span class="sr-only"> (opens in a new tab)</span>
-            </a>
-            ${renderFeed(data.instagram)}
-          </section>
-        </div>
+        <section id="photos" class="photos" aria-labelledby="photos-heading">
+          <div class="section-head">
+            <h2 id="photos-heading">${esc(data.gallery.title)}</h2>
+          </div>
+          ${renderGallery(data.gallery)}
+        </section>
+
+        <section id="instagram" class="card ig-section" aria-labelledby="instagram-heading">
+          <h2 id="instagram-heading">${esc(data.instagram.title)}</h2>
+          <div class="ig-actions">
+            <a class="btn" href="${esc(data.instagram.url)}"${externalAttrs(data.instagram.url, { me: true })}>${esc(data.instagram.followLabel)}<span class="sr-only"> (opens in a new tab)</span></a>
+            <a class="btn btn-ghost" href="${esc(data.instagram.messageUrl)}"${externalAttrs(data.instagram.messageUrl)}>${esc(data.instagram.messageLabel)}<span class="sr-only"> (opens in a new tab)</span></a>
+          </div>
+          ${renderInstagramFeed(data.instagram, data.gallery)}
+        </section>
+
+        <section id="performances" class="card" aria-labelledby="performances-heading">
+          <h2 id="performances-heading">${esc(data.performances.title)}</h2>
+          <p class="fine">${esc(data.performances.note)}</p>
+          ${renderShows(data.performances)}
+        </section>
 
         <section id="bands" class="bands" aria-labelledby="bands-heading">
           <h2 id="bands-heading">${esc(data.bands.title)}</h2>
@@ -337,6 +407,14 @@ function renderPage(data, assetHash) {
         <p class="footer-legal">© ${year}</p>
       </div>
     </footer>
+    <dialog class="lightbox" id="lightbox" aria-label="Photo">
+      <div class="lightbox-bar">
+        <button type="button" class="btn btn-ghost" data-lightbox-prev>Previous</button>
+        <button type="button" class="btn btn-ghost" data-lightbox-next>Next</button>
+        <button type="button" class="btn" data-lightbox-close>Close</button>
+      </div>
+      <img class="lightbox-img" alt="" data-lightbox-img>
+    </dialog>
     <script src="/main.js?v=${assetHash.js}"></script>
   </body>
 </html>
