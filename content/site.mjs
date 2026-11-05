@@ -53,6 +53,7 @@ export const site = {
     { label: "Performances", href: "#performances" },
     { label: "Bands", href: "#bands" },
     { label: "Instagram", href: "#instagram" },
+    { label: "Photography", href: "#photography" },
     { label: "Contact", href: "#contact" },
   ],
 
@@ -101,7 +102,7 @@ export const site = {
   },
 
   gallery: {
-    title: "Photos",
+    title: "Photography",
     credit: "Photos: Greg Thistle Photography",
     items: [
       {

@@ -363,7 +363,7 @@ function renderPage(data, assetHash) {
           ${renderInstagramFeed(data.instagram, data.gallery)}
         </section>
 
-        <section id="photos" class="photos" aria-labelledby="photos-heading">
+        <section id="photography" class="photos" aria-labelledby="photos-heading">
           <div class="section-head">
             <h2 id="photos-heading">${esc(data.gallery.title)}</h2>
           </div>
