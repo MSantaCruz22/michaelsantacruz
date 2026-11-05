@@ -4,53 +4,26 @@
     <meta charset="utf-8">
     <title>Michael Santa Cruz</title>
     <style>
-      @font-face {
-        font-family: Cinzel;
-        font-weight: 500 700;
-        src: url("../public/fonts/cinzel-latin.woff2") format("woff2");
-      }
-      @font-face {
-        font-family: "Source Sans 3";
-        font-weight: 600;
-        src: url("../public/fonts/source-sans-3-latin.woff2") format("woff2");
-      }
-      html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
-      body {
-        display: grid;
-        grid-template-columns: 0.9fr 1.1fr;
-        align-items: center;
-        color: #f7f1e6;
-        font-family: "Source Sans 3", sans-serif;
-        background:
-          radial-gradient(90% 80% at 30% 40%, transparent 30%, rgba(20, 0, 6, 0.45) 100%),
-          repeating-linear-gradient(90deg, rgba(0,0,0,.28) 0 12px, rgba(255,210,210,.05) 20px, rgba(0,0,0,.12) 36px, rgba(80,8,20,.35) 52px),
-          linear-gradient(180deg, #4a0d1c, #8d1d36 30%, #5c1224);
-      }
-      .copy { padding: 48px 36px 48px 64px; }
-      h1 {
-        margin: 0;
-        font-family: Cinzel, serif;
-        font-weight: 700;
-        font-size: 64px;
-        line-height: 0.95;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-      }
-      .last { display: block; color: #f3d78c; }
-      p { margin: 18px 0 0; letter-spacing: 0.12em; text-transform: uppercase; font-size: 18px; }
-      .tours { color: #f3d78c; font-family: Cinzel, serif; font-size: 22px; }
-      .frame { background: #070707; padding: 18px 0; margin-right: 48px; }
-      .frame img { width: 100%; height: 420px; object-fit: cover; object-position: 66% 36%; display: block; }
+      @font-face { font-family: "Cormorant Garamond"; font-style: italic; font-weight: 500; src: url("../public/fonts/cormorant-garamond-italic.woff2") format("woff2"); }
+      @font-face { font-family: Oswald; font-weight: 500; src: url("../public/fonts/oswald-latin.woff2") format("woff2"); }
+      html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; background: #fff; color: #111; }
+      body { display: grid; grid-template-rows: auto 1fr; }
+      header { text-align: center; padding: 28px 24px 12px; }
+      h1 { margin: 0; font-family: "Cormorant Garamond", serif; font-style: italic; font-weight: 500; font-size: 64px; line-height: 1; }
+      p { margin: 8px 0 0; font-family: Oswald, sans-serif; letter-spacing: 0.18em; text-transform: uppercase; font-size: 16px; }
+      .frame { position: relative; margin: 0 48px 28px; background: #111; overflow: hidden; }
+      .frame img { width: 100%; height: 100%; object-fit: cover; object-position: 62% 40%; display: block; }
+      .shade { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 30%, rgba(0,0,0,.62)); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 28px; color: #fff; }
     </style>
   </head>
   <body>
-    <div class="copy">
-      <h1>Michael<span class="last">Santa Cruz</span></h1>
+    <header>
+      <h1>Michael Santa Cruz</h1>
       <p>Drummer · Musician · Producer · Teacher</p>
-      <p class="tours">Available for tours: NYC / LA</p>
-    </div>
+    </header>
     <div class="frame">
       <img src="../public/images/michael-drumming-1200.jpg" alt="">
+      <div class="shade"><p>Available for tours: NYC / LA</p></div>
     </div>
   </body>
 </html>

@@ -30,7 +30,7 @@ export const site = {
     alt: "Michael Santa Cruz playing drums on stage, wearing sunglasses and a leopard-print shirt",
     width: 1600,
     height: 1258,
-    sizes: "(min-width: 960px) 880px, calc(100vw - 2rem)",
+    sizes: "(min-width: 1000px) 1120px, calc(100vw - 2.5rem)",
     src: "/images/michael-drumming-1200.webp",
     srcset:
       "/images/michael-drumming-800.webp 800w, /images/michael-drumming-1200.webp 1200w, /images/michael-drumming-1600.webp 1600w",
@@ -50,7 +50,6 @@ export const site = {
   },
 
   nav: [
-    { label: "Michael", href: "#content" },
     { label: "Performances", href: "#performances" },
     { label: "Bands", href: "#bands" },
     { label: "Instagram", href: "#instagram" },

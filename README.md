@@ -1,6 +1,6 @@
 # Michael Santa Cruz
 
-Single-page site for Michael Santa Cruz. It is staged like a small theater: a crimson curtain, gold serif navigation, and his photo in a centered screen. Netlify builds it from this repo with no extra setup.
+Single-page site for Michael Santa Cruz. It is a quiet gallery page: white field, black type, his photography up front, and a solid black footer. Netlify builds it from this repo with no extra setup.
 
 ## Edit content
 

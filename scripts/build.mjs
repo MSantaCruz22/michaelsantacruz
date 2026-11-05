@@ -173,7 +173,7 @@ function renderGallery(gallery) {
       const focus = photo.focus ? ` style="object-position:${esc(photo.focus)}"` : "";
       return `<li class="photo-card${featured}">
           <button type="button" class="photo-open" data-index="${index}" data-full="${esc(photo.large)}" data-alt="${esc(photo.alt)}">
-            <img src="${esc(photo.thumb)}" srcset="${esc(photo.srcset)}" sizes="(min-width: 800px) 320px, 70vw" alt="${esc(photo.alt)}" width="${photo.width}" height="${photo.height}" loading="lazy" decoding="async"${focus}>
+            <img src="${esc(photo.thumb)}" srcset="${esc(photo.srcset)}" sizes="(min-width: 800px) 320px, 70vw" alt="${esc(photo.alt)}" width="${photo.width}" height="${photo.height}" decoding="async"${focus}>
           </button>
           ${photo.caption ? `<p class="photo-caption">${esc(photo.caption)}</p>` : ""}
         </li>`;
@@ -186,7 +186,7 @@ function fallbackSlides(ig, gallery) {
   return gallery.items
     .map((photo) => {
       return `<a class="ig-card" href="${esc(ig.url)}"${externalAttrs(ig.url, { me: true })}>
-          <img src="${esc(photo.thumb)}" alt="${esc(photo.alt)}" width="${photo.width}" height="${photo.height}" loading="lazy" decoding="async">
+          <img src="${esc(photo.thumb)}" alt="${esc(photo.alt)}" width="${photo.width}" height="${photo.height}" decoding="async">
         </a>`;
     })
     .join("");
@@ -282,8 +282,8 @@ function renderPage(data, assetHash) {
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="color-scheme" content="dark">
-    <meta name="theme-color" content="#5c1020">
+    <meta name="color-scheme" content="light">
+    <meta name="theme-color" content="#ffffff">
     <meta name="format-detection" content="telephone=no">
     <title>${esc(data.seo.title)}</title>
     <meta name="description" content="${esc(data.seo.description)}">
@@ -299,39 +299,45 @@ function renderPage(data, assetHash) {
     <meta name="twitter:description" content="${esc(data.seo.description)}">
     <meta name="twitter:image" content="${esc(image)}">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-    <link rel="mask-icon" href="/favicon.svg" color="#f0d48a">
-    <link rel="preload" href="/fonts/cinzel-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="mask-icon" href="/favicon.svg" color="#111111">
+    <link rel="preload" href="/fonts/cormorant-garamond-italic.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/oswald-latin.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/fonts/source-sans-3-latin.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" as="image" href="${esc(data.photo.src)}" imagesrcset="${esc(data.photo.srcset)}" imagesizes="${esc(data.photo.sizes)}" fetchpriority="high">
     <link rel="stylesheet" href="/styles.css?v=${assetHash.css}">
     <script type="application/ld+json">${jsonLd(data, pageUrl)}</script>
   </head>
   <body>
-    <div class="curtain" aria-hidden="true"></div>
     <a class="skip" href="#content">Skip to content</a>
     <header class="site-header">
-      <nav class="nav" aria-label="Sections">
+      <a class="wordmark" href="#content"><h1 id="hero-title">${esc(data.name)}</h1></a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+        <span class="sr-only">Menu</span>
+        <span class="burger" aria-hidden="true"></span>
+      </button>
+      <nav class="nav" id="site-nav" aria-label="Sections">
         ${renderNav(data)}
       </nav>
     </header>
     <main id="content" tabindex="-1">
       <section class="hero" aria-labelledby="hero-title">
-        <h1 id="hero-title">
-          <span class="name-first">${esc(name.first)}</span>${
-            name.last ? `\n          <span class="name-last">${esc(name.last)}</span>` : ""
-          }
-        </h1>
-        <p class="tagline">${esc(data.tagline)}</p>
+        <div class="hero-frame">
+          ${renderStage(data)}
+          <div class="hero-overlay">
+            <p class="tagline">${esc(data.tagline)}</p>
+            <p class="tours"><span class="tours-label">${esc(data.tours.label)}:</span> <span class="tours-bases">${esc(data.tours.bases)}</span></p>
+            <div class="hero-ctas">
+              <a class="pill" href="${esc(data.instagram.url)}"${externalAttrs(data.instagram.url, { me: true })}>Instagram<span class="sr-only"> (opens in a new tab)</span></a>
+              <a class="pill" href="${esc(data.instagram.messageUrl)}"${externalAttrs(data.instagram.messageUrl)}>Message me<span class="sr-only"> (opens in a new tab)</span></a>
+              <a class="pill" href="#contact">${esc(data.contact.label)}</a>
+            </div>
+          </div>
+        </div>
         <p class="intro">${introBadge}<span>${esc(data.intro)}</span></p>
-        ${renderStage(data)}
-        <p class="tours">
-          <span class="tours-label">${esc(data.tours.label)}:</span>
-          <span class="tours-bases">${esc(data.tours.bases)}</span>
-        </p>
         <ul class="socials">${renderSocials(data)}</ul>
         <section id="lessons" class="lessons" aria-labelledby="lessons-heading">
           <h2 id="lessons-heading">${esc(data.lessons.line)}</h2>
-          <a class="btn" href="#contact" data-reason="${esc(data.lessons.reason)}">${esc(data.contact.label)}${assist}</a>
+          <a class="pill pill-line" href="#contact" data-reason="${esc(data.lessons.reason)}">${esc(data.contact.label)}${assist}</a>
         </section>
       </section>
       <div class="wrap stack">
@@ -425,20 +431,12 @@ function renderPage(data, assetHash) {
       </div>
     </main>
     <footer class="site-footer">
-      <div class="apron" aria-hidden="true">
-        <svg class="mic" viewBox="0 0 64 150">
-          <path d="M32 8c8 0 12 8 12 16v28c0 8-4 16-12 16s-12-8-12-16V24c0-8 4-16 12-16z" fill="none" stroke="#1a0a0e" stroke-width="3"/>
-          <path d="M16 48c0 14 7 24 16 24s16-10 16-24" fill="none" stroke="#1a0a0e" stroke-width="3"/>
-          <path d="M32 72v62M22 134h20" fill="none" stroke="#1a0a0e" stroke-width="3" stroke-linecap="round"/>
-        </svg>
-        <div class="footlights">
-          ${Array.from({ length: 17 }, () => `<span class="bulb"></span>`).join("")}
-        </div>
-      </div>
-      <div class="wrap footer-inner">
-        <p class="footer-name">${esc(data.name)}</p>
-        <p class="footer-tag">${esc(data.tagline)}</p>
-        <p class="footer-legal">© ${year}</p>
+      <a class="footer-mark" href="#content">${esc(data.name)}</a>
+      <div class="footer-rule"></div>
+      <div class="footer-bar">
+        <p class="footer-legal">© ${year} ${esc(data.name)}</p>
+        <a class="to-top" href="#content">Back to top</a>
+        <a class="footer-ig" href="${esc(data.instagram.url)}"${externalAttrs(data.instagram.url, { me: true })}>${icon("instagram")}<span class="sr-only">${esc(data.instagram.followLabel)} (opens in a new tab)</span></a>
       </div>
     </footer>
     <dialog class="lightbox" id="lightbox" aria-label="Photo">
