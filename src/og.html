@@ -5,77 +5,51 @@
     <title>Michael Santa Cruz</title>
     <style>
       @font-face {
-        font-family: "Fraunces";
-        font-style: normal;
+        font-family: Cinzel;
         font-weight: 500 700;
-        src: url("../public/fonts/fraunces-latin.woff2") format("woff2");
+        src: url("../public/fonts/cinzel-latin.woff2") format("woff2");
       }
       @font-face {
-        font-family: "Nunito Sans";
-        font-style: normal;
-        font-weight: 500 700;
-        src: url("../public/fonts/nunito-sans-latin.woff2") format("woff2");
+        font-family: "Source Sans 3";
+        font-weight: 600;
+        src: url("../public/fonts/source-sans-3-latin.woff2") format("woff2");
       }
       html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
       body {
         display: grid;
-        grid-template-columns: 1.05fr 0.95fr;
+        grid-template-columns: 0.9fr 1.1fr;
+        align-items: center;
+        color: #f7f1e6;
+        font-family: "Source Sans 3", sans-serif;
         background:
-          radial-gradient(520px 360px at 0% 100%, rgba(62, 107, 74, 0.55), transparent 60%),
-          #1a120c;
-        color: #f6efe2;
-        font-family: "Nunito Sans", sans-serif;
+          radial-gradient(90% 80% at 30% 40%, transparent 30%, rgba(20, 0, 6, 0.45) 100%),
+          repeating-linear-gradient(90deg, rgba(0,0,0,.28) 0 12px, rgba(255,210,210,.05) 20px, rgba(0,0,0,.12) 36px, rgba(80,8,20,.35) 52px),
+          linear-gradient(180deg, #4a0d1c, #8d1d36 30%, #5c1224);
       }
-      .copy {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        padding: 56px 40px 56px 64px;
-      }
+      .copy { padding: 48px 36px 48px 64px; }
       h1 {
         margin: 0;
-        font-family: Fraunces, serif;
+        font-family: Cinzel, serif;
         font-weight: 700;
-        font-size: 84px;
-        line-height: 0.88;
-        letter-spacing: -0.03em;
+        font-size: 64px;
+        line-height: 0.95;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
       }
-      .last { display: block; color: #e2a322; }
-      .rule {
-        width: 76px;
-        height: 6px;
-        margin-top: 22px;
-        border-radius: 99px;
-        background: linear-gradient(90deg, #8fb56a, #e2a322 55%, #c4542a);
-      }
-      p { margin: 22px 0 0; font-size: 24px; font-weight: 600; }
-      .tours {
-        margin-top: 18px;
-        font-family: Fraunces, serif;
-        font-weight: 700;
-        font-size: 28px;
-        color: #e2a322;
-      }
-      .photo {
-        position: relative;
-        overflow: hidden;
-      }
-      .photo img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        object-position: 68% 36%;
-      }
+      .last { display: block; color: #f3d78c; }
+      p { margin: 18px 0 0; letter-spacing: 0.12em; text-transform: uppercase; font-size: 18px; }
+      .tours { color: #f3d78c; font-family: Cinzel, serif; font-size: 22px; }
+      .frame { background: #070707; padding: 18px 0; margin-right: 48px; }
+      .frame img { width: 100%; height: 420px; object-fit: cover; object-position: 66% 36%; display: block; }
     </style>
   </head>
   <body>
     <div class="copy">
       <h1>Michael<span class="last">Santa Cruz</span></h1>
-      <div class="rule"></div>
       <p>Drummer · Musician · Producer · Teacher</p>
       <p class="tours">Available for tours: NYC / LA</p>
     </div>
-    <div class="photo">
+    <div class="frame">
       <img src="../public/images/michael-drumming-1200.jpg" alt="">
     </div>
   </body>
