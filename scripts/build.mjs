@@ -300,7 +300,6 @@ function renderPage(data, assetHash) {
     <meta name="twitter:image" content="${esc(image)}">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="mask-icon" href="/favicon.svg" color="#111111">
-    <link rel="preload" href="/fonts/cormorant-garamond-italic.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/fonts/oswald-latin.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/fonts/source-sans-3-latin.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" as="image" href="${esc(data.photo.src)}" imagesrcset="${esc(data.photo.srcset)}" imagesizes="${esc(data.photo.sizes)}" fetchpriority="high">

@@ -1,17 +1,9 @@
-/* Cormorant Garamond, Oswald, and Source Sans 3 are under the SIL Open Font License. See public/fonts. */
-
-@font-face {
-  font-family: "Cormorant Garamond";
-  font-style: italic;
-  font-weight: 500 600;
-  font-display: swap;
-  src: url("/fonts/cormorant-garamond-italic.woff2") format("woff2");
-}
+/* Oswald and Source Sans 3 are under the SIL Open Font License. See public/fonts. */
 
 @font-face {
   font-family: Oswald;
   font-style: normal;
-  font-weight: 400 500;
+  font-weight: 400 700;
   font-display: swap;
   src: url("/fonts/oswald-latin.woff2") format("woff2");
 }
@@ -29,7 +21,6 @@
   --paper: #ffffff;
   --muted: #5c5c5c;
   --line: rgba(17, 17, 17, 0.14);
-  --script: "Cormorant Garamond", "Palatino Linotype", Palatino, serif;
   --cond: Oswald, "Arial Narrow", sans-serif;
   --body: "Source Sans 3", "Segoe UI", sans-serif;
   --header-h: 8.5rem;
@@ -115,13 +106,14 @@ a, button { -webkit-tap-highlight-color: transparent; }
 
 .wordmark h1 {
   margin: 0;
-  font-family: var(--script);
-  font-style: italic;
-  font-weight: 500;
-  font-size: clamp(2.5rem, 6vw, 4.15rem);
-  letter-spacing: 0.01em;
-  line-height: 1;
+  font-family: var(--cond);
+  font-style: normal;
+  font-weight: 600;
+  font-size: clamp(1.7rem, 5.4vw, 3.35rem);
+  letter-spacing: 0.14em;
+  line-height: 1.05;
   text-align: center;
+  text-transform: uppercase;
 }
 
 .nav-toggle {
@@ -228,12 +220,12 @@ a, button { -webkit-tap-highlight-color: transparent; }
 
 .tagline {
   margin: 0;
-  font-family: var(--script);
-  font-style: italic;
-  font-weight: 500;
-  font-size: clamp(1.35rem, 3vw, 2.15rem);
-  letter-spacing: 0.02em;
-  text-transform: none;
+  font-family: var(--cond);
+  font-style: normal;
+  font-weight: 400;
+  font-size: clamp(0.78rem, 1.8vw, 1.05rem);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
 }
 
 .tours {
@@ -646,13 +638,16 @@ button.btn:disabled { opacity: 0.55; cursor: wait; }
 
 .footer-mark {
   display: inline-block;
+  max-width: 100%;
   color: #fff;
   text-decoration: none;
-  font-family: var(--script);
-  font-style: italic;
-  font-weight: 500;
-  font-size: clamp(2.8rem, 8vw, 5.4rem);
-  line-height: 1;
+  font-family: var(--cond);
+  font-style: normal;
+  font-weight: 600;
+  font-size: clamp(1.7rem, 6vw, 3.6rem);
+  letter-spacing: 0.14em;
+  line-height: 1.05;
+  text-transform: uppercase;
 }
 
 .footer-rule {
