@@ -946,6 +946,8 @@ button.btn:disabled { opacity: 0.55; cursor: wait; }
   min-width: min(100%, 16rem);
 }
 
+.shop > .product-cta { margin: 0 0 1.25rem; }
+
 a.product-cta:hover,
 button.product-cta:hover {
   background: transparent;

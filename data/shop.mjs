@@ -20,17 +20,18 @@ export const shop = {
   buyLabel: "Shop Now",
   soonNote: "The shop is not open yet.",
   sectionTitle: "Shop",
-  sectionNote: "Launch Line",
-  viewLabel: "View",
-  backShop: "Back to Shop",
-  backHome: "Back to Home",
+  sectionNote: "",
+  backShop: "Shop",
+  backHome: "Home",
   sizeLabel: "Size",
   colorLabel: "Color",
   products: [
     {
       slug: "signature-drummer-tee",
       title: "Signature Drummer Tee",
-      note: "A heavyweight cotton tee cut for the long haul — rehearsal, load-in, and the walk home after the set.",
+      note: "Heavyweight cotton tee.",
+      line: "Heavyweight cotton tee.",
+      details: "Relaxed fit. Cotton.",
       description: [
         "A heavyweight cotton tee cut for the long haul — rehearsal, load-in, and the walk home after the set. The front carries a clean Santa Cruz mark. Nothing loud. Just the work.",
         "Printed on demand. Ships when you order it.",
@@ -74,7 +75,9 @@ export const shop = {
     {
       slug: "nyc-la-tour-hoodie",
       title: "NYC \u2194 LA Tour Hoodie",
-      note: "Built for the split life.",
+      note: "Midweight fleece hoodie.",
+      line: "Midweight fleece hoodie.",
+      details: "Regular fit. Fleece.",
       description: [
         "Built for the split life. Midweight fleece with a quiet NYC\u2013LA graphic \u2014 made for the flight, the van, and the late session.",
         "Two cities. One kit. Pulled on between them.",
@@ -118,7 +121,9 @@ export const shop = {
     {
       slug: "keep-time-dad-hat",
       title: "Keep Time Dad Hat",
-      note: "Unstructured and low profile, with an embroidered Keep Time emblem on the front.",
+      note: "Embroidered dad hat.",
+      line: "Embroidered dad hat.",
+      details: "One size. Cotton twill.",
       description: [
         "Unstructured and low profile, with an embroidered Keep Time emblem on the front. One size, everyday. Built to live on a kit bag or a hook by the door.",
         "Embroidered on demand. Ships when you order it.",
@@ -150,7 +155,9 @@ export const shop = {
     {
       slug: "drum-shed-tote",
       title: "Drum Shed Tote",
-      note: "A sturdy canvas tote for sticks, charts, and whatever else leaves the shed.",
+      note: "Canvas tote.",
+      line: "Canvas tote.",
+      details: "Canvas.",
       description: [
         "A sturdy canvas tote for sticks, charts, and whatever else leaves the shed. Same quiet Santa Cruz mark as the rest of the line. Natural or black. Made to be thrown over a shoulder on the way out the door.",
         "Printed on demand. Ships when you order it.",

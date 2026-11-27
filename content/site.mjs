@@ -173,9 +173,9 @@ export const site = {
     handle: "@mikeysantacruz",
     url: "https://www.instagram.com/mikeysantacruz/",
     messageUrl: "https://ig.me/m/mikeysantacruz",
-    followLabel: "Follow @mikeysantacruz",
-    messageLabel: "Message me on Instagram",
-    fallbackNote: "These photos link to his Instagram until the live feed is connected.",
+    followLabel: "Follow",
+    messageLabel: "Message",
+    fallbackNote: "",
     // Live feed options. Leave both blank to use the Netlify function when
     // INSTAGRAM_ACCESS_TOKEN is set, or to keep the photo fallback.
     // provider: "behold" or "lightwidget"

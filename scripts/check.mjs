@@ -27,8 +27,8 @@ const exact = {
   handle: "@mikeysantacruz",
   instagram: "https://www.instagram.com/mikeysantacruz/",
   message: "https://ig.me/m/mikeysantacruz",
-  follow: "Follow @mikeysantacruz",
-  messageLabel: "Message me on Instagram",
+  follow: "Follow",
+  messageLabel: "Message",
   credit: "Photos: Greg Thistle Photography",
   bands: [
     ["Flotilla \u2014 Drummer", "https://www.instagram.com/Flotilla_Band/", "@Flotilla_Band"],
@@ -82,7 +82,9 @@ must(fs.existsSync(path.join(root, "dist", "favicon.svg")), "favicon missing fro
 must(!/href=""/.test(html), "empty href");
 must(!/href="#"(?![\w-])/.test(html), "bare hash href");
 must(!/lorem|ipsum|grammy|testimonial/i.test(text), "unexpected invented copy");
-must((html.match(/class="tag"/g) || []).length >= 5, "expected visible placeholder badges");
+must(!/Placeholder|real dates and venues|live feed is connected|A short intro line|Launch Line/i.test(text), "placeholder or internal notes are still visible");
+must(!html.includes('id="performances"'), "placeholder performances should be hidden");
+must(!html.includes("#performances"), "performances nav should be hidden");
 
 for (const [label, href, handle] of exact.bands) {
   must(site.bands.items.some((item) => item.label === label && item.href === href && item.handle === handle), `${label} missing from content`);
@@ -91,6 +93,7 @@ for (const [label, href, handle] of exact.bands) {
   must(text.includes(handle), `${handle} missing`);
 }
 
+must(html.includes(exact.instagram), "Instagram profile missing");
 must(text.includes(exact.follow), "Follow button missing");
 must(text.includes(exact.messageLabel), "Message button missing");
 must(html.includes(exact.message), "message link missing");
@@ -134,12 +137,10 @@ for (const product of shop.products) {
   must(page.includes(`<title>${escText(product.metaTitle)}</title>`), `${product.slug} meta title missing`);
   must(page.includes(escText(product.metaDescription)), `${product.slug} meta description missing`);
   must(page.includes(product.price), `${product.slug} price missing`);
-  for (const paragraph of product.description) {
-    must(page.includes(escText(paragraph)), `${product.slug} description missing`);
-  }
-  for (const spec of product.specs) {
-    must(page.includes(escText(spec.value)), `${product.slug} spec missing: ${spec.label}`);
-  }
+  must(page.includes(escText(product.line)), `${product.slug} short line missing`);
+  must(page.includes(escText(product.details)), `${product.slug} fit or material missing`);
+  must(!page.includes("Printed on demand. Ships when you order it."), `${product.slug} long description still on the page`);
+  must(!page.includes("confirm on the blank"), `${product.slug} internal spec still on the page`);
   for (const color of product.colors) {
     must(page.includes(color.name), `${product.slug} color missing: ${color.name}`);
   }

@@ -55,7 +55,9 @@ function externalAttrs(href, { me = false } = {}) {
 }
 
 function renderNav(data, root = "") {
+  const showPerformances = data.performances.items.some((item) => !item.placeholder);
   return data.nav
+    .filter((item) => item.href !== "#performances" || showPerformances)
     .map((item) => {
       const href = item.href.startsWith("#") ? `${root}${item.href}` : item.href;
       const reason =
@@ -148,15 +150,11 @@ function renderShopSection(catalog) {
             ${renderPlate(product, { interactive: false })}
             <h3>${esc(product.title)}</h3>
             <p class="shop-price">${esc(product.price)}</p>
-            <p class="fine">${esc(product.note)}</p>
-            <p class="shop-more">${esc(catalog.viewLabel)}</p>
           </a>
         </li>`;
     })
     .join("\n          ");
-  const note = catalog.sectionNote
-    ? `<p class="fine">${esc(catalog.sectionNote)}</p>`
-    : "";
+  const note = "";
   return `<section id="shop" class="card shop" aria-labelledby="shop-heading">
           <h2 id="shop-heading">${esc(catalog.sectionTitle)}</h2>
           ${note}
@@ -264,10 +262,8 @@ function renderSocials(data) {
     })),
   ];
   return items
+    .filter((item) => item.href)
     .map((item) => {
-      if (!item.href) {
-        return `<li><span class="social is-placeholder">${icon(item.icon)}<span class="social-label">${esc(item.label)}</span><span class="tag">${esc(site.placeholderLabel)}</span></span></li>`;
-      }
       const sr = /^https?:/i.test(item.href) ? " (opens in a new tab)" : "";
       return `<li><a class="social" href="${esc(item.href)}"${externalAttrs(item.href, { me: item.me })}>${icon(item.icon)}<span class="sr-only">${esc(item.text)}${sr}</span></a></li>`;
     })
@@ -300,15 +296,11 @@ function renderChip(link, { me = false } = {}) {
 }
 
 function renderShows(block) {
-  if (!block.items.length) {
-    return `<p class="fine">${esc(block.empty)}</p>`;
-  }
-  const items = block.items
+  const shows = block.items.filter((show) => !show.placeholder);
+  if (!shows.length) return "";
+  const items = shows
     .map((show) => {
-      const badges = [
-        show.placeholder ? `<span class="tag">${esc(site.placeholderLabel)}</span>` : "",
-        show.timing ? `<span class="timing">${esc(show.timing)}</span>` : "",
-      ]
+      const badges = [show.timing ? `<span class="timing">${esc(show.timing)}</span>` : ""]
         .filter(Boolean)
         .join("");
       const title = show.href
@@ -374,7 +366,6 @@ function renderInstagramFeed(ig, gallery) {
           <div class="ig-set" aria-hidden="true">${slides}</div>
         </div>
       </div>
-      <p class="fine" data-ig-note>${esc(ig.fallbackNote)}</p>
     </div>`;
 }
 
@@ -427,9 +418,9 @@ function renderPage(data, assetHash) {
       return `<option value="${esc(item.value)}"${selected}>${esc(item.label)}</option>`;
     })
     .join("");
-  const introBadge = data.introIsPlaceholder
-    ? `<span class="tag">${esc(data.placeholderLabel)}</span>`
-    : "";
+  const intro = data.introIsPlaceholder
+    ? ""
+    : `<p class="intro"><span>${esc(data.intro)}</span></p>`;
   const assist = data.lessons.buttonAssist
     ? `<span class="sr-only"> ${esc(data.lessons.buttonAssist)}</span>`
     : "";
@@ -479,7 +470,7 @@ function renderPage(data, assetHash) {
             </div>
           </div>
         </div>
-        <p class="intro">${introBadge}<span>${esc(data.intro)}</span></p>
+        ${intro}
         <ul class="socials">${renderSocials(data)}</ul>
         <section id="lessons" class="lessons" aria-labelledby="lessons-heading">
           <h2 id="lessons-heading">${esc(data.lessons.line)}</h2>
@@ -488,11 +479,10 @@ function renderPage(data, assetHash) {
       </section>
       <div class="wrap stack">
 
-        <section id="performances" class="card" aria-labelledby="performances-heading">
+        ${data.performances.items.some((item) => !item.placeholder) ? `<section id="performances" class="card" aria-labelledby="performances-heading">
           <h2 id="performances-heading">${esc(data.performances.title)}</h2>
-          <p class="fine">${esc(data.performances.note)}</p>
           ${renderShows(data.performances)}
-        </section>
+        </section>` : ""}
 
         <section id="bands" class="bands" aria-labelledby="bands-heading">
           <h2 id="bands-heading">${esc(data.bands.title)}</h2>
@@ -600,12 +590,8 @@ function renderProductPage(data, catalog, product, assetHash) {
   const canonical = pageUrl ? `\n    <link rel="canonical" href="${esc(pageUrl + pathName)}">` : "";
   const ogUrl = pageUrl ? `\n    <meta property="og:url" content="${esc(pageUrl + pathName)}">` : "";
   const title = product.metaTitle;
-  const description = product.description.map((paragraph) => `<p>${esc(paragraph)}</p>`).join("");
-  const specs = `<dl class="product-specs">${product.specs
-    .map(
-      (spec) => `<div><dt>${esc(spec.label)}</dt><dd>${esc(spec.value)}</dd></div>`,
-    )
-    .join("")}</dl>`;
+  const blurb = product.line ? `<p>${esc(product.line)}</p>` : "";
+  const details = product.details ? `<p class="product-meta">${esc(product.details)}</p>` : "";
   const sizes = renderChoices(catalog.sizeLabel, product.sizes, (size, selected) => {
     const checked = selected ? " checked" : "";
     return `<label class="size-option"><input class="sr-only" type="radio" name="size-${esc(product.slug)}" value="${esc(size)}"${checked}><span>${esc(size)}</span></label>`;
@@ -655,10 +641,10 @@ function renderProductPage(data, catalog, product, assetHash) {
           <div class="product-copy">
             <h1>${esc(product.title)}</h1>
             <p class="product-price">${esc(product.price)}</p>
-            ${description}
+            ${blurb}
+            ${details}
             ${sizes}
             ${colors}
-            ${specs}
             ${renderProductCta(catalog, product)}
           </div>
         </article>
