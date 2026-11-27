@@ -3,6 +3,7 @@ import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { site } from "../content/site.mjs";
+import { shop } from "../data/shop.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const dist = path.join(root, "dist");
@@ -53,16 +54,141 @@ function externalAttrs(href, { me = false } = {}) {
   return ` target="_blank" rel="${rel}"`;
 }
 
-function renderNav(data) {
+function renderNav(data, root = "") {
   return data.nav
     .map((item) => {
+      const href = item.href.startsWith("#") ? `${root}${item.href}` : item.href;
       const reason =
         item.href === "#contact"
           ? ` data-reason="${esc(data.contact.defaultReason)}"`
           : "";
-      return `<a href="${esc(item.href)}"${reason}>${esc(item.label)}</a>`;
+      return `<a href="${esc(href)}"${reason}>${esc(item.label)}</a>`;
     })
     .join("\n          ");
+}
+
+function safeHex(value) {
+  return /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(String(value || ""))
+    ? String(value)
+    : "#111111";
+}
+
+function assertShop(catalog) {
+  if (!catalog || !Array.isArray(catalog.products) || catalog.products.length === 0) {
+    throw new Error("shop.products must list at least one item");
+  }
+  const slugs = new Set();
+  for (const product of catalog.products) {
+    if (!product.slug || !/^[a-z0-9-]+$/.test(product.slug)) {
+      throw new Error(`Invalid shop slug: ${product.slug}`);
+    }
+    if (slugs.has(product.slug)) throw new Error(`Duplicate shop slug: ${product.slug}`);
+    slugs.add(product.slug);
+    for (const key of ["title", "note", "description", "price", "image", "imageAlt", "fit", "material"]) {
+      if (!String(product[key] || "").trim()) {
+        throw new Error(`Shop item ${product.slug} is missing ${key}`);
+      }
+    }
+    if (!product.sizes?.length) throw new Error(`Shop item ${product.slug} needs sizes`);
+    if (!product.colors?.length) throw new Error(`Shop item ${product.slug} needs colors`);
+  }
+}
+
+function shopOffer(catalog, product) {
+  const direct = String(product.url || "").trim();
+  if (/^https?:\/\//i.test(direct)) {
+    return { href: direct, label: catalog.buyLabel, external: true };
+  }
+  const base = String(catalog.baseUrl || "").trim().replace(/\/$/, "");
+  if (/^https?:\/\//i.test(base)) {
+    const extra = String(product.path || "").trim();
+    const href = extra ? `${base}${extra.startsWith("/") ? extra : `/${extra}`}` : base;
+    return { href, label: catalog.comingSoonLabel, external: true };
+  }
+  return { href: "", label: catalog.comingSoonLabel, external: false };
+}
+
+function renderShopImage(product) {
+  return `<img src="${esc(product.image)}" alt="${esc(product.imageAlt)}" width="${Number(product.width) || 800}" height="${Number(product.height) || 800}" decoding="async">`;
+}
+
+function renderShopSection(catalog) {
+  const cards = catalog.products
+    .map((product) => {
+      return `<li>
+          <a class="shop-card" href="/shop/${esc(product.slug)}.html">
+            ${renderShopImage(product)}
+            <h3>${esc(product.title)}</h3>
+            <p class="shop-price">${esc(product.price)}</p>
+            <p class="fine">${esc(product.note)}</p>
+            <p class="shop-more">${esc(catalog.viewLabel)}</p>
+          </a>
+        </li>`;
+    })
+    .join("\n          ");
+  return `<section id="shop" class="card shop" aria-labelledby="shop-heading">
+          <h2 id="shop-heading">${esc(catalog.sectionTitle)}</h2>
+          <p class="fine"><span class="tag">${esc(site.placeholderLabel)}</span> ${esc(catalog.sectionNote)}</p>
+          <ul class="shop-grid">
+          ${cards}
+          </ul>
+        </section>`;
+}
+
+function renderChoices(label, values, renderItem) {
+  const options = values
+    .map((value, index) => renderItem(value, index === 0))
+    .join("");
+  return `<fieldset class="choice">
+            <legend>${esc(label)}</legend>
+            <div class="choice-row">${options}</div>
+          </fieldset>`;
+}
+
+function renderProductCta(catalog, product) {
+  const offer = shopOffer(catalog, product);
+  if (!offer.href) {
+    return `<button class="btn product-cta" type="button" disabled>${esc(offer.label)}</button>
+            <p class="fine">${esc(catalog.soonNote)}</p>`;
+  }
+  const external = offer.external ? externalAttrs(offer.href) : "";
+  const sr = offer.external ? `<span class="sr-only"> (opens in a new tab)</span>` : "";
+  const note = offer.label === catalog.comingSoonLabel ? `<p class="fine">${esc(catalog.soonNote)}</p>` : "";
+  return `<a class="btn product-cta" href="${esc(offer.href)}"${external}>${esc(offer.label)}${sr}</a>
+            ${note}`;
+}
+
+function renderHeader(data, { home }) {
+  const root = home ? "" : "/";
+  const markHref = home ? "#content" : "/";
+  const mark = home
+    ? `<h1 id="hero-title">${esc(data.name)}</h1>`
+    : `<span class="wordmark-text">${esc(data.name)}</span>`;
+  return `<a class="skip" href="#content">Skip to content</a>
+    <header class="site-header">
+      <a class="wordmark" href="${markHref}">${mark}</a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+        <span class="sr-only">Menu</span>
+        <span class="burger" aria-hidden="true"></span>
+      </button>
+      <nav class="nav" id="site-nav" aria-label="Sections">
+        ${renderNav(data, root)}
+      </nav>
+    </header>`;
+}
+
+function renderFooter(data, { home }) {
+  const year = new Date().getFullYear();
+  const top = home ? "#content" : "/";
+  return `<footer class="site-footer">
+      <a class="footer-mark" href="${top}">${esc(data.name)}</a>
+      <div class="footer-rule"></div>
+      <div class="footer-bar">
+        <p class="footer-legal">© ${year} ${esc(data.name)}</p>
+        <a class="to-top" href="${top}">Back to top</a>
+        <a class="footer-ig" href="${esc(data.instagram.url)}"${externalAttrs(data.instagram.url, { me: true })}>${icon("instagram")}<span class="sr-only">${esc(data.instagram.followLabel)} (opens in a new tab)</span></a>
+      </div>
+    </footer>`;
 }
 
 function icon(name) {
@@ -263,7 +389,6 @@ function renderPage(data, assetHash) {
   const image = pageUrl ? `${pageUrl}${data.seo.ogImage}` : data.seo.ogImage;
   const canonical = pageUrl ? `\n    <link rel="canonical" href="${esc(pageUrl)}">` : "";
   const ogUrl = pageUrl ? `\n    <meta property="og:url" content="${esc(pageUrl)}">` : "";
-  const year = new Date().getFullYear();
   const reasonOptions = data.contact.reasons
     .map((item) => {
       const selected = item.value === data.contact.defaultReason ? " selected" : "";
@@ -307,17 +432,7 @@ function renderPage(data, assetHash) {
     <script type="application/ld+json">${jsonLd(data, pageUrl)}</script>
   </head>
   <body>
-    <a class="skip" href="#content">Skip to content</a>
-    <header class="site-header">
-      <a class="wordmark" href="#content"><h1 id="hero-title">${esc(data.name)}</h1></a>
-      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
-        <span class="sr-only">Menu</span>
-        <span class="burger" aria-hidden="true"></span>
-      </button>
-      <nav class="nav" id="site-nav" aria-label="Sections">
-        ${renderNav(data)}
-      </nav>
-    </header>
+    ${renderHeader(data, { home: true })}
     <main id="content" tabindex="-1">
       <section class="hero" aria-labelledby="hero-title">
         <div class="hero-frame">
@@ -369,6 +484,8 @@ function renderPage(data, assetHash) {
           </div>
           ${renderGallery(data.gallery)}
         </section>
+
+        ${renderShopSection(shop)}
 
         <section id="contact" class="card contact-card" aria-labelledby="contact-heading">
           <h2 id="contact-heading">${contactHeading(data.contact.label)}</h2>
@@ -429,15 +546,7 @@ function renderPage(data, assetHash) {
         </section>
       </div>
     </main>
-    <footer class="site-footer">
-      <a class="footer-mark" href="#content">${esc(data.name)}</a>
-      <div class="footer-rule"></div>
-      <div class="footer-bar">
-        <p class="footer-legal">© ${year} ${esc(data.name)}</p>
-        <a class="to-top" href="#content">Back to top</a>
-        <a class="footer-ig" href="${esc(data.instagram.url)}"${externalAttrs(data.instagram.url, { me: true })}>${icon("instagram")}<span class="sr-only">${esc(data.instagram.followLabel)} (opens in a new tab)</span></a>
-      </div>
-    </footer>
+    ${renderFooter(data, { home: true })}
     <dialog class="lightbox" id="lightbox" aria-label="Photo">
       <div class="lightbox-bar">
         <button type="button" class="btn btn-ghost" data-lightbox-prev>Previous</button>
@@ -452,11 +561,95 @@ function renderPage(data, assetHash) {
 `;
 }
 
+function renderProductPage(data, catalog, product, assetHash) {
+  const pageUrl = data.seo.siteUrl.replace(/\/$/, "");
+  const pathName = `/shop/${product.slug}.html`;
+  const image = pageUrl ? `${pageUrl}${product.image}` : product.image;
+  const canonical = pageUrl ? `\n    <link rel="canonical" href="${esc(pageUrl + pathName)}">` : "";
+  const ogUrl = pageUrl ? `\n    <meta property="og:url" content="${esc(pageUrl + pathName)}">` : "";
+  const title = `${product.title} — ${data.name}`;
+  const sizes = renderChoices(catalog.sizeLabel, product.sizes, (size, selected) => {
+    const checked = selected ? " checked" : "";
+    return `<label class="size-option"><input class="sr-only" type="radio" name="size-${esc(product.slug)}" value="${esc(size)}"${checked}><span>${esc(size)}</span></label>`;
+  });
+  const colors = renderChoices(catalog.colorLabel, product.colors, (color, selected) => {
+    const checked = selected ? " checked" : "";
+    return `<label class="swatch"><input class="sr-only" type="radio" name="color-${esc(product.slug)}" value="${esc(color.name)}"${checked}><span class="swatch-chip" style="background:${safeHex(color.hex)}"></span><span class="swatch-name">${esc(color.name)}</span></label>`;
+  });
+  return `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="format-detection" content="telephone=no">
+    <title>${esc(title)}</title>
+    <meta name="description" content="${esc(product.description)}">
+    <meta name="author" content="${esc(data.name)}">${canonical}
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="${esc(title)}">${ogUrl}
+    <meta property="og:description" content="${esc(product.description)}">
+    <meta property="og:image" content="${esc(image)}">
+    <meta property="og:image:alt" content="${esc(product.imageAlt)}">
+    <meta property="og:locale" content="en_US">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="${esc(title)}">
+    <meta name="twitter:description" content="${esc(product.description)}">
+    <meta name="twitter:image" content="${esc(image)}">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="mask-icon" href="/favicon.svg" color="#111111">
+    <link rel="preload" href="/fonts/oswald-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/source-sans-3-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="/styles.css?v=${assetHash.css}">
+  </head>
+  <body>
+    ${renderHeader(data, { home: false })}
+    <main id="content" tabindex="-1">
+      <div class="wrap stack product-page">
+        <nav class="crumb" aria-label="Product">
+          <a href="/#shop">${esc(catalog.backShop)}</a>
+          <a href="/">${esc(catalog.backHome)}</a>
+        </nav>
+        <article class="product">
+          <figure class="product-plate">
+            ${renderShopImage(product)}
+          </figure>
+          <div class="product-copy">
+            <p class="fine"><span class="tag">${esc(data.placeholderLabel)}</span> ${esc(catalog.sectionNote)}</p>
+            <h1>${esc(product.title)}</h1>
+            <p class="product-price">${esc(product.price)}</p>
+            <p>${esc(product.description)}</p>
+            ${sizes}
+            ${colors}
+            <dl class="product-specs">
+              <div>
+                <dt>${esc(catalog.fitLabel)}</dt>
+                <dd>${esc(product.fit)}</dd>
+              </div>
+              <div>
+                <dt>${esc(catalog.materialLabel)}</dt>
+                <dd>${esc(product.material)}</dd>
+              </div>
+            </dl>
+            ${renderProductCta(catalog, product)}
+          </div>
+        </article>
+      </div>
+    </main>
+    ${renderFooter(data, { home: false })}
+    <script src="/main.js?v=${assetHash.js}"></script>
+  </body>
+</html>
+`;
+}
+
 function hashFile(filePath) {
   return createHash("sha256").update(readFileSync(filePath)).digest("hex").slice(0, 10);
 }
 
 assertSite(site);
+assertShop(shop);
 rmSync(dist, { recursive: true, force: true });
 mkdirSync(dist, { recursive: true });
 cpSync(path.join(root, "public"), dist, { recursive: true });
@@ -469,6 +662,14 @@ const assetHash = {
 };
 
 writeFileSync(path.join(dist, "index.html"), renderPage(site, assetHash));
+const shopDir = path.join(dist, "shop");
+mkdirSync(shopDir, { recursive: true });
+for (const product of shop.products) {
+  writeFileSync(
+    path.join(shopDir, `${product.slug}.html`),
+    renderProductPage(site, shop, product, assetHash),
+  );
+}
 
 const pageUrl = site.seo.siteUrl.replace(/\/$/, "");
 const robots = pageUrl
@@ -476,10 +677,13 @@ const robots = pageUrl
   : "User-agent: *\nAllow: /\n";
 writeFileSync(path.join(dist, "robots.txt"), robots);
 if (pageUrl) {
+  const locs = ["/", ...shop.products.map((product) => `/shop/${product.slug}.html`)]
+    .map((loc) => `  <url><loc>${pageUrl}${loc}</loc></url>`)
+    .join("\n");
   writeFileSync(
     path.join(dist, "sitemap.xml"),
-    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>${pageUrl}/</loc></url>\n</urlset>\n`,
+    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${locs}\n</urlset>\n`,
   );
 }
 
-console.log("Built dist/index.html");
+console.log(`Built dist/index.html and ${shop.products.length} shop pages`);

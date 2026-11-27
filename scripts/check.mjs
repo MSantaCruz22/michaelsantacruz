@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { site } from "../content/site.mjs";
+import { shop } from "../data/shop.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const html = fs.readFileSync(path.join(root, "dist", "index.html"), "utf8");
@@ -100,6 +101,27 @@ must(html.includes('id="photography"'), "photography section missing");
 must(html.includes("blue swirl-pattern drum kit"), "street kit alt missing");
 must(html.includes("netlify/functions/instagram") || html.includes("/.netlify/functions/instagram"), "instagram function url missing");
 must((html.match(/rel="me noopener noreferrer"/g) || []).length >= 1, "personal Instagram should use rel=me");
+
+const emoji = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/u;
+must(shop.products.length === 3, "expected 3 shop products");
+must(html.includes('id="shop"'), "shop section missing");
+must(html.includes('href="#shop"'), "shop nav link missing");
+must(text.includes(shop.sectionTitle), "shop title missing");
+must(!emoji.test(JSON.stringify(shop)), "emoji in shop catalog");
+must(!emoji.test(html), "emoji in homepage");
+for (const product of shop.products) {
+  const pagePath = path.join(root, "dist", "shop", `${product.slug}.html`);
+  must(fs.existsSync(pagePath), `${product.slug} page missing`);
+  const page = fs.readFileSync(pagePath, "utf8");
+  must(page.includes(`<h1>${product.title}</h1>`), `${product.slug} title missing`);
+  must(page.includes(product.price), `${product.slug} price missing`);
+  must(page.includes(shop.comingSoonLabel) || page.includes(shop.buyLabel), `${product.slug} shop button missing`);
+  must(page.includes('href="/#shop"'), `${product.slug} back to shop missing`);
+  must(page.includes('href="/"'), `${product.slug} back home missing`);
+  must(html.includes(`/shop/${product.slug}.html`), `${product.slug} card link missing`);
+  must(!emoji.test(page), `emoji on ${product.slug} page`);
+  must(!/href=""/.test(page), `empty href on ${product.slug}`);
+}
 
 if (failed) process.exit(1);
 console.log("content checks passed");

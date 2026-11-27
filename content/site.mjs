@@ -54,6 +54,7 @@ export const site = {
     { label: "Bands", href: "#bands" },
     { label: "Instagram", href: "#instagram" },
     { label: "Photography", href: "#photography" },
+    { label: "Shop", href: "#shop" },
     { label: "Contact", href: "#contact" },
   ],
 
