@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Michael Santa Cruz</title>
+    <style>
+      @font-face { font-family: Oswald; font-weight: 400 700; src: url("../public/fonts/oswald-latin.woff2") format("woff2"); }
+      html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; background: #fff; color: #111; }
+      body { display: grid; grid-template-rows: auto 1fr; }
+      header { text-align: center; padding: 28px 24px 12px; }
+      h1 { margin: 0; font-family: Oswald, sans-serif; font-weight: 600; font-size: 54px; line-height: 1.05; letter-spacing: 0.12em; text-transform: uppercase; }
+      p { margin: 8px 0 0; font-family: Oswald, sans-serif; letter-spacing: 0.18em; text-transform: uppercase; font-size: 16px; }
+      .frame { position: relative; margin: 0 48px 28px; background: #111; overflow: hidden; }
+      .frame img { width: 100%; height: 100%; object-fit: cover; object-position: 62% 40%; display: block; }
+      .shade { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 30%, rgba(0,0,0,.62)); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 28px; color: #fff; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Michael Santa Cruz</h1>
+      <p>Drummer · Musician · Producer · Teacher</p>
+    </header>
+    <div class="frame">
+      <img src="../public/images/michael-drumming-1200.jpg" alt="">
+      <div class="shade"><p>Available for tours: NYC / LA</p></div>
+    </div>
+  </body>
+</html>
