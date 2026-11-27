@@ -114,15 +114,13 @@ function artFor(product, color) {
 }
 
 function shopOffer(catalog, product) {
-  const direct = String(product.url || "").trim();
+  const direct = String(product?.url || "").trim();
+  const base = String(catalog.baseUrl || "").trim().replace(/\/$/, "");
   if (/^https?:\/\//i.test(direct)) {
     return { href: direct, label: catalog.buyLabel, external: true };
   }
-  const base = String(catalog.baseUrl || "").trim().replace(/\/$/, "");
   if (/^https?:\/\//i.test(base)) {
-    const extra = String(product.path || "").trim();
-    const href = extra ? `${base}${extra.startsWith("/") ? extra : `/${extra}`}` : base;
-    return { href, label: catalog.comingSoonLabel, external: true };
+    return { href: base, label: catalog.buyLabel, external: true };
   }
   return { href: "", label: catalog.comingSoonLabel, external: false };
 }
@@ -162,6 +160,7 @@ function renderShopSection(catalog) {
   return `<section id="shop" class="card shop" aria-labelledby="shop-heading">
           <h2 id="shop-heading">${esc(catalog.sectionTitle)}</h2>
           ${note}
+          ${renderProductCta(catalog, { url: "" })}
           <ul class="shop-grid">
           ${cards}
           </ul>

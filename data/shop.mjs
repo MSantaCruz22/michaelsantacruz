@@ -2,13 +2,12 @@
  * Merch catalog. Edit this file, then run npm run build.
  *
  * baseUrl
- *   Shop subdomain, no trailing slash. Leave "" until Michael copies the
- *   real address from the Fourthwall dashboard. Do not guess it.
+ *   Fourthwall shop home, no trailing slash.
  * product.url
- *   Full Fourthwall product URL. When this is an https link, the button
- *   label switches to buyLabel and opens that product.
- * product.path
- *   Appended to baseUrl while url is still empty.
+ *   Leave "" until that product exists in Fourthwall. While url is empty,
+ *   the button opens baseUrl, the shop home. Paste the full product URL
+ *   into url and that button opens the exact item. Do not invent a
+ *   /products/ path.
  * art.black / art.white
  *   Web PNGs in public/shop/. Black ink on light garments, white ink on dark.
  * color.ink
@@ -16,9 +15,9 @@
  */
 
 export const shop = {
-  baseUrl: "",
+  baseUrl: "https://msc-wfr-shop.fourthwall.com",
   comingSoonLabel: "Coming Soon",
-  buyLabel: "Shop",
+  buyLabel: "Shop Now",
   soonNote: "The shop is not open yet.",
   sectionTitle: "Shop",
   sectionNote: "Launch Line",
@@ -45,7 +44,6 @@ export const shop = {
         black: "/shop/santa-cruz-minimal-mark.png",
         white: "/shop/santa-cruz-minimal-mark-white-ink.png",
       },
-      path: "",
       url: "",
       sizes: ["S", "M", "L", "XL", "2XL"],
       colors: [
@@ -91,7 +89,6 @@ export const shop = {
         black: "/shop/nyc-la-drummer-tee.png",
         white: "/shop/nyc-la-drummer-tee-white-ink.png",
       },
-      path: "",
       url: "",
       sizes: ["S", "M", "L", "XL", "2XL"],
       colors: [
@@ -135,7 +132,6 @@ export const shop = {
         black: "/shop/keep-time-emblem.png",
         white: "/shop/keep-time-emblem-white-ink.png",
       },
-      path: "",
       url: "",
       sizes: ["One Size"],
       colors: [
@@ -168,7 +164,6 @@ export const shop = {
         black: "/shop/santa-cruz-minimal-mark.png",
         white: "/shop/santa-cruz-minimal-mark-white-ink.png",
       },
-      path: "",
       url: "",
       sizes: ["One Size"],
       colors: [

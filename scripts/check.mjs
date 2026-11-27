@@ -112,9 +112,15 @@ function escText(value) {
 }
 
 const emoji = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/u;
+const shopHome = "https://msc-wfr-shop.fourthwall.com";
 must(shop.products.length === 4, "expected 4 shop products");
-must(shop.baseUrl === "", "shop baseUrl must stay empty until the real address is copied in");
-must(!/https?:\/\//i.test(JSON.stringify(shop)), "shop catalog must not invent a shop URL");
+must(shop.baseUrl === shopHome, "shop baseUrl is not the confirmed Fourthwall home");
+must(shop.buyLabel === "Shop Now", "shop button label should be Shop Now");
+must(shop.products.every((product) => product.url === ""), "product url must stay empty until Fourthwall has the item");
+must(!/\/products\//.test(JSON.stringify(shop)), "do not guess Fourthwall product paths");
+must(html.includes(`href="${shopHome}"`), "homepage shop link missing");
+must(html.includes("Shop Now"), "homepage Shop Now missing");
+must(!html.includes(`${shopHome}/`), "homepage shop link must be the home page only");
 must(html.includes('id="shop"'), "shop section missing");
 must(html.includes('href="#shop"'), "shop nav link missing");
 must(text.includes(shop.sectionTitle), "shop title missing");
@@ -140,7 +146,12 @@ for (const product of shop.products) {
   for (const size of product.sizes) {
     must(page.includes(`>${size}<`), `${product.slug} size missing: ${size}`);
   }
-  must(page.includes(shop.comingSoonLabel), `${product.slug} Coming Soon button missing`);
+  must(page.includes(`href="${shopHome}"`), `${product.slug} shop link missing`);
+  must(page.includes('target="_blank"'), `${product.slug} shop link should open a new tab`);
+  must(page.includes('rel="noopener'), `${product.slug} shop link needs rel=noopener`);
+  must(page.includes("Shop Now"), `${product.slug} Shop Now button missing`);
+  must(!page.includes("Coming Soon"), `${product.slug} still says Coming Soon`);
+  must(!page.includes(`${shopHome}/`), `${product.slug} shop link must be the home page only`);
   must(page.includes("data-art-white") && page.includes("data-art-black"), `${product.slug} ink variants missing`);
   must(page.includes('href="/#shop"'), `${product.slug} back to shop missing`);
   must(page.includes('href="/"'), `${product.slug} back home missing`);
