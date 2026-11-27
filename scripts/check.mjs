@@ -102,8 +102,19 @@ must(html.includes("blue swirl-pattern drum kit"), "street kit alt missing");
 must(html.includes("netlify/functions/instagram") || html.includes("/.netlify/functions/instagram"), "instagram function url missing");
 must((html.match(/rel="me noopener noreferrer"/g) || []).length >= 1, "personal Instagram should use rel=me");
 
+function escText(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
 const emoji = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/u;
-must(shop.products.length === 3, "expected 3 shop products");
+must(shop.products.length === 4, "expected 4 shop products");
+must(shop.baseUrl === "", "shop baseUrl must stay empty until the real address is copied in");
+must(!/https?:\/\//i.test(JSON.stringify(shop)), "shop catalog must not invent a shop URL");
 must(html.includes('id="shop"'), "shop section missing");
 must(html.includes('href="#shop"'), "shop nav link missing");
 must(text.includes(shop.sectionTitle), "shop title missing");
@@ -113,12 +124,28 @@ for (const product of shop.products) {
   const pagePath = path.join(root, "dist", "shop", `${product.slug}.html`);
   must(fs.existsSync(pagePath), `${product.slug} page missing`);
   const page = fs.readFileSync(pagePath, "utf8");
-  must(page.includes(`<h1>${product.title}</h1>`), `${product.slug} title missing`);
+  must(page.includes(`<h1>${escText(product.title)}</h1>`), `${product.slug} title missing`);
+  must(page.includes(`<title>${escText(product.metaTitle)}</title>`), `${product.slug} meta title missing`);
+  must(page.includes(escText(product.metaDescription)), `${product.slug} meta description missing`);
   must(page.includes(product.price), `${product.slug} price missing`);
-  must(page.includes(shop.comingSoonLabel) || page.includes(shop.buyLabel), `${product.slug} shop button missing`);
+  for (const paragraph of product.description) {
+    must(page.includes(escText(paragraph)), `${product.slug} description missing`);
+  }
+  for (const spec of product.specs) {
+    must(page.includes(escText(spec.value)), `${product.slug} spec missing: ${spec.label}`);
+  }
+  for (const color of product.colors) {
+    must(page.includes(color.name), `${product.slug} color missing: ${color.name}`);
+  }
+  for (const size of product.sizes) {
+    must(page.includes(`>${size}<`), `${product.slug} size missing: ${size}`);
+  }
+  must(page.includes(shop.comingSoonLabel), `${product.slug} Coming Soon button missing`);
+  must(page.includes("data-art-white") && page.includes("data-art-black"), `${product.slug} ink variants missing`);
   must(page.includes('href="/#shop"'), `${product.slug} back to shop missing`);
   must(page.includes('href="/"'), `${product.slug} back home missing`);
   must(html.includes(`/shop/${product.slug}.html`), `${product.slug} card link missing`);
+  must(html.includes(product.price), `${product.slug} price missing on homepage`);
   must(!emoji.test(page), `emoji on ${product.slug} page`);
   must(!/href=""/.test(page), `empty href on ${product.slug}`);
 }

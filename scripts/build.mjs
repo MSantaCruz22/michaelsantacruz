@@ -84,14 +84,33 @@ function assertShop(catalog) {
     }
     if (slugs.has(product.slug)) throw new Error(`Duplicate shop slug: ${product.slug}`);
     slugs.add(product.slug);
-    for (const key of ["title", "note", "description", "price", "image", "imageAlt", "fit", "material"]) {
+    for (const key of ["title", "note", "price", "imageAlt", "metaTitle", "metaDescription"]) {
       if (!String(product[key] || "").trim()) {
         throw new Error(`Shop item ${product.slug} is missing ${key}`);
       }
     }
+    if (!product.description?.length) {
+      throw new Error(`Shop item ${product.slug} needs a description`);
+    }
+    if (!product.specs?.length) throw new Error(`Shop item ${product.slug} needs specs`);
     if (!product.sizes?.length) throw new Error(`Shop item ${product.slug} needs sizes`);
     if (!product.colors?.length) throw new Error(`Shop item ${product.slug} needs colors`);
+    if (!product.art?.black || !product.art?.white) {
+      throw new Error(`Shop item ${product.slug} needs black and white art`);
+    }
+    if (!product.metaTitle || !product.metaDescription) {
+      throw new Error(`Shop item ${product.slug} needs SEO title and description`);
+    }
+    for (const color of product.colors) {
+      if (color.ink !== "black" && color.ink !== "white") {
+        throw new Error(`Shop item ${product.slug} color ${color.name} needs ink black or white`);
+      }
+    }
   }
+}
+
+function artFor(product, color) {
+  return color.ink === "white" ? product.art.white : product.art.black;
 }
 
 function shopOffer(catalog, product) {
@@ -108,8 +127,19 @@ function shopOffer(catalog, product) {
   return { href: "", label: catalog.comingSoonLabel, external: false };
 }
 
-function renderShopImage(product) {
-  return `<img src="${esc(product.image)}" alt="${esc(product.imageAlt)}" width="${Number(product.width) || 800}" height="${Number(product.height) || 800}" decoding="async">`;
+function renderPlate(product, { interactive }) {
+  const color = product.colors[0];
+  const src = artFor(product, color);
+  const bg = safeHex(color.hex);
+  const img = `<img src="${esc(src)}" alt="${esc(product.imageAlt)}" width="1200" height="1200" decoding="async"${
+    interactive
+      ? ` data-art-white="${esc(product.art.white)}" data-art-black="${esc(product.art.black)}"`
+      : ""
+  }>`;
+  if (!interactive) {
+    return `<span class="shop-plate" style="background:${bg}">${img}</span>`;
+  }
+  return `<figure class="product-plate" data-product-preview style="background:${bg}">${img}</figure>`;
 }
 
 function renderShopSection(catalog) {
@@ -117,7 +147,7 @@ function renderShopSection(catalog) {
     .map((product) => {
       return `<li>
           <a class="shop-card" href="/shop/${esc(product.slug)}.html">
-            ${renderShopImage(product)}
+            ${renderPlate(product, { interactive: false })}
             <h3>${esc(product.title)}</h3>
             <p class="shop-price">${esc(product.price)}</p>
             <p class="fine">${esc(product.note)}</p>
@@ -126,9 +156,12 @@ function renderShopSection(catalog) {
         </li>`;
     })
     .join("\n          ");
+  const note = catalog.sectionNote
+    ? `<p class="fine">${esc(catalog.sectionNote)}</p>`
+    : "";
   return `<section id="shop" class="card shop" aria-labelledby="shop-heading">
           <h2 id="shop-heading">${esc(catalog.sectionTitle)}</h2>
-          <p class="fine"><span class="tag">${esc(site.placeholderLabel)}</span> ${esc(catalog.sectionNote)}</p>
+          ${note}
           <ul class="shop-grid">
           ${cards}
           </ul>
@@ -564,17 +597,24 @@ function renderPage(data, assetHash) {
 function renderProductPage(data, catalog, product, assetHash) {
   const pageUrl = data.seo.siteUrl.replace(/\/$/, "");
   const pathName = `/shop/${product.slug}.html`;
-  const image = pageUrl ? `${pageUrl}${product.image}` : product.image;
+  const image = pageUrl ? `${pageUrl}${product.art.black}` : product.art.black;
   const canonical = pageUrl ? `\n    <link rel="canonical" href="${esc(pageUrl + pathName)}">` : "";
   const ogUrl = pageUrl ? `\n    <meta property="og:url" content="${esc(pageUrl + pathName)}">` : "";
-  const title = `${product.title} — ${data.name}`;
+  const title = product.metaTitle;
+  const description = product.description.map((paragraph) => `<p>${esc(paragraph)}</p>`).join("");
+  const specs = `<dl class="product-specs">${product.specs
+    .map(
+      (spec) => `<div><dt>${esc(spec.label)}</dt><dd>${esc(spec.value)}</dd></div>`,
+    )
+    .join("")}</dl>`;
   const sizes = renderChoices(catalog.sizeLabel, product.sizes, (size, selected) => {
     const checked = selected ? " checked" : "";
     return `<label class="size-option"><input class="sr-only" type="radio" name="size-${esc(product.slug)}" value="${esc(size)}"${checked}><span>${esc(size)}</span></label>`;
   });
   const colors = renderChoices(catalog.colorLabel, product.colors, (color, selected) => {
     const checked = selected ? " checked" : "";
-    return `<label class="swatch"><input class="sr-only" type="radio" name="color-${esc(product.slug)}" value="${esc(color.name)}"${checked}><span class="swatch-chip" style="background:${safeHex(color.hex)}"></span><span class="swatch-name">${esc(color.name)}</span></label>`;
+    const bg = safeHex(color.hex);
+    return `<label class="swatch"><input class="sr-only" type="radio" name="color-${esc(product.slug)}" value="${esc(color.name)}" data-bg="${bg}" data-ink="${esc(color.ink)}"${checked}><span class="swatch-chip" style="background:${bg}"></span><span class="swatch-name">${esc(color.name)}</span></label>`;
   });
   return `<!DOCTYPE html>
 <html lang="en">
@@ -585,17 +625,17 @@ function renderProductPage(data, catalog, product, assetHash) {
     <meta name="theme-color" content="#ffffff">
     <meta name="format-detection" content="telephone=no">
     <title>${esc(title)}</title>
-    <meta name="description" content="${esc(product.description)}">
+    <meta name="description" content="${esc(product.metaDescription)}">
     <meta name="author" content="${esc(data.name)}">${canonical}
     <meta property="og:type" content="website">
     <meta property="og:title" content="${esc(title)}">${ogUrl}
-    <meta property="og:description" content="${esc(product.description)}">
+    <meta property="og:description" content="${esc(product.metaDescription)}">
     <meta property="og:image" content="${esc(image)}">
     <meta property="og:image:alt" content="${esc(product.imageAlt)}">
     <meta property="og:locale" content="en_US">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${esc(title)}">
-    <meta name="twitter:description" content="${esc(product.description)}">
+    <meta name="twitter:description" content="${esc(product.metaDescription)}">
     <meta name="twitter:image" content="${esc(image)}">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="mask-icon" href="/favicon.svg" color="#111111">
@@ -612,26 +652,14 @@ function renderProductPage(data, catalog, product, assetHash) {
           <a href="/">${esc(catalog.backHome)}</a>
         </nav>
         <article class="product">
-          <figure class="product-plate">
-            ${renderShopImage(product)}
-          </figure>
+          ${renderPlate(product, { interactive: true })}
           <div class="product-copy">
-            <p class="fine"><span class="tag">${esc(data.placeholderLabel)}</span> ${esc(catalog.sectionNote)}</p>
             <h1>${esc(product.title)}</h1>
             <p class="product-price">${esc(product.price)}</p>
-            <p>${esc(product.description)}</p>
+            ${description}
             ${sizes}
             ${colors}
-            <dl class="product-specs">
-              <div>
-                <dt>${esc(catalog.fitLabel)}</dt>
-                <dd>${esc(product.fit)}</dd>
-              </div>
-              <div>
-                <dt>${esc(catalog.materialLabel)}</dt>
-                <dd>${esc(product.material)}</dd>
-              </div>
-            </dl>
+            ${specs}
             ${renderProductCta(catalog, product)}
           </div>
         </article>

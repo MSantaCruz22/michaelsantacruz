@@ -177,3 +177,16 @@ if (scroller && track && !reduceMotion) {
   });
   requestAnimationFrame(step);
 }
+
+const productPlate = document.querySelector("[data-product-preview]");
+const productArt = productPlate?.querySelector("img");
+document.querySelectorAll("[data-ink]").forEach((input) => {
+  input.addEventListener("change", () => {
+    if (!input.checked || !productPlate || !productArt) return;
+    const bg = input.getAttribute("data-bg");
+    const ink = input.getAttribute("data-ink");
+    if (bg) productPlate.style.background = bg;
+    const next = productArt.getAttribute(ink === "white" ? "data-art-white" : "data-art-black");
+    if (next) productArt.src = next;
+  });
+});
